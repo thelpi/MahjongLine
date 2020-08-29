@@ -27,7 +27,7 @@ namespace MahjongLineClient
             StpDoraTiles.SetDorasPanel(endOfRoundInformations.DoraTiles, endOfRoundInformations.DoraVisibleCount);
             StpUraDoraTiles.SetDorasPanel(endOfRoundInformations.UraDoraTiles, endOfRoundInformations.UraDoraVisibleCount);
 
-            foreach (EndOfRoundInformationsPivot.PlayerInformationsPivot p in endOfRoundInformations.PlayersInfo)
+            foreach (EndOfRoundPlayerInformationsPivot p in endOfRoundInformations.PlayersInfo)
             {
                 if (p.HandPointsGain > 0)
                 {

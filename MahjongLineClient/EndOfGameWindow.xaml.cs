@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace MahjongLineClient
 {
@@ -14,11 +12,11 @@ namespace MahjongLineClient
         /// Constructor.
         /// </summary>
         /// <param name="game">The game.</param>
-        public EndOfGameWindow(GamePivot game)
+        public EndOfGameWindow(RequestManager requestManager, GamePivot game)
         {
             InitializeComponent();
 
-            List<PlayerScorePivot> playerScores = ScoreTools.ComputeCurrentRanking(game);
+            List<PlayerScorePivot> playerScores = requestManager.ComputeCurrentRanking(game);
             for (int i = 0; i < playerScores.Count; i++)
             {
                 this.FindControl("LblRank", i).Content = playerScores[i].Rank;

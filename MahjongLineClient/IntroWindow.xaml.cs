@@ -31,6 +31,7 @@ namespace MahjongLineClient
             Hide();
 
             new MainWindow(
+                new RequestManager(),
                 TxtPlayerName.Text,
                 (InitialPointsRulePivot)CbbPointsRule.SelectedIndex,
                 (EndOfGameRulePivot)CbbEndOfGameRule.SelectedIndex,

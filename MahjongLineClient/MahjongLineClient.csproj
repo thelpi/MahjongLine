@@ -74,6 +74,7 @@
     <Compile Include="ChronoPivot.cs" />
     <Compile Include="CpuSpeedPivot.cs" />
     <Compile Include="EndOfGameWindow.xaml.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GraphicTools.cs" />
     <Compile Include="IntroWindow.xaml.cs" />
     <Compile Include="MainWindow.xaml.cs" />
@@ -91,16 +92,17 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="RequestManager.cs" />
     <Compile Include="ScoreWindow.xaml.cs" />
-    <Compile Include="ViewModel\DragonPivot.cs" />
-    <Compile Include="ViewModel\DrawTypePivot.cs" />
-    <Compile Include="ViewModel\EndOfGameRulePivot.cs" />
+    <Compile Include="ViewModel\EndOfRoundPlayerInformationsPivot.cs" />
+    <Compile Include="ViewModel\Enum\DragonPivot.cs" />
+    <Compile Include="ViewModel\Enum\DrawTypePivot.cs" />
+    <Compile Include="ViewModel\Enum\EndOfGameRulePivot.cs" />
     <Compile Include="ViewModel\EndOfRoundInformationsPivot.cs" />
-    <Compile Include="ViewModel\FamilyPivot.cs" />
+    <Compile Include="ViewModel\Enum\FamilyPivot.cs" />
     <Compile Include="ViewModel\GamePivot.cs" />
     <Compile Include="ViewModel\HandPivot.cs" />
-    <Compile Include="ViewModel\IaManagerPivot.cs" />
-    <Compile Include="ViewModel\InitialPointsRulePivot.cs" />
+    <Compile Include="ViewModel\Enum\InitialPointsRulePivot.cs" />
     <Compile Include="ViewModel\PlayerPivot.cs" />
     <Compile Include="ViewModel\PlayerScorePivot.cs" />
     <Compile Include="ViewModel\RiichiPivot.cs" />
@@ -108,7 +110,7 @@
     <Compile Include="ViewModel\TileComboPivot.cs" />
     <Compile Include="ViewModel\TilePivot.cs" />
     <Compile Include="ViewModel\WinContextPivot.cs" />
-    <Compile Include="ViewModel\WindPivot.cs" />
+    <Compile Include="ViewModel\Enum\WindPivot.cs" />
     <Compile Include="ViewModel\YakuPivot.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -334,10 +336,10 @@
     <Resource Include="yade.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="App.xaml">
+    <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
+    </ApplicationDefinition>
     <Page Include="EndOfGameWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

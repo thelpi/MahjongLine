@@ -94,7 +94,7 @@ namespace MahjongLineClient
         /// </summary>
         /// <param name="p">The player informations for this round.</param>
         /// <returns>A panel with informations about hand value.</returns>
-        internal static DockPanel GenerateYakusInfosPanel(this EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        internal static DockPanel GenerateYakusInfosPanel(this EndOfRoundPlayerInformationsPivot p)
         {
             var boxPanel = new DockPanel();
 
@@ -346,7 +346,7 @@ namespace MahjongLineClient
 
         #region Private methods
 
-        private static Grid PointsGridForScoreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static Grid PointsGridForScoreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             var gridPoints = new Grid
             {
@@ -374,7 +374,7 @@ namespace MahjongLineClient
             return gridPoints;
         }
 
-        private static Label GainLabelForScoreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static Label GainLabelForScoreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             var gainLbl = new Label
             {
@@ -387,7 +387,7 @@ namespace MahjongLineClient
             return gainLbl;
         }
 
-        private static Line SeparatorForScoreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static Line SeparatorForScoreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             if (p.Yakus == null || p.Yakus.Count == 0)
             {
@@ -405,7 +405,7 @@ namespace MahjongLineClient
             return separator;
         }
 
-        private static Label FuLabelForScopreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static Label FuLabelForScopreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             if (p.Yakus == null || p.Yakus.Count == 0)
             {
@@ -422,7 +422,7 @@ namespace MahjongLineClient
             return fuLbl;
         }
 
-        private static Label FanlabelForScoreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static Label FanlabelForScoreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             if (p.Yakus == null || p.Yakus.Count == 0)
             {
@@ -439,7 +439,7 @@ namespace MahjongLineClient
             return fanLbl;
         }
 
-        private static Grid YakusGridForScoreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static Grid YakusGridForScoreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             if (p.Yakus == null || p.Yakus.Count == 0)
             {
@@ -475,7 +475,7 @@ namespace MahjongLineClient
             return gridYakus;
         }
 
-        private static StackPanel HandPanelForScoreDisplay(EndOfRoundInformationsPivot.PlayerInformationsPivot p)
+        private static StackPanel HandPanelForScoreDisplay(EndOfRoundPlayerInformationsPivot p)
         {
             var handPanel = new StackPanel
             {
@@ -483,7 +483,7 @@ namespace MahjongLineClient
                 Height = TILE_HEIGHT + (0.5 * DEFAULT_TILE_MARGIN),
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-            foreach (Tuple<TilePivot, bool, bool> tile in p.GetFullHandForDisplay())
+            foreach (Tuple<TilePivot, bool, bool> tile in p.Hand.GetFullHandForDisplay())
             {
                 Button b = GenerateTileButton(tile.Item1, null, (tile.Item2 ? AnglePivot.A90 : AnglePivot.A0), false);
                 if (tile.Item3)
