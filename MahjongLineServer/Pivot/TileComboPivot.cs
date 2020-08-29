@@ -394,20 +394,6 @@ namespace MahjongLineServer.Pivot
             }
         }
 
-        // Gets the tile corresponding to the specified wind in the purpose to create a sorted list for display.
-        private Tuple<TilePivot, bool> GetTileForSortedListAtSpecifiedWind(WindPivot wind, List<TilePivot> concealedOnly, ref int i)
-        {
-            if (wind == StolenFrom.Value)
-            {
-                return new Tuple<TilePivot, bool>(OpenTile, true);
-            }
-            else
-            {
-                i++;
-                return new Tuple<TilePivot, bool>(concealedOnly[i - 1], false);
-            }
-        }
-
         #endregion Private methods
 
         #region Static methods
@@ -449,54 +435,5 @@ namespace MahjongLineServer.Pivot
         }
 
         #endregion Static methods
-
-        #region Public methods
-
-        /// <summary>
-        /// Checks if the specified tile index must be displayed as concealed (aka tiles 2 and 3 from a square).
-        /// </summary>
-        /// <param name="i">The tile index.</param>
-        /// <returns><c>True</c> if concealed display; <c>False</c> otherwise.</returns>
-        public bool IsConcealedDisplay(int i)
-        {
-            return IsSquare && IsConcealed && i > 0 && i < 3;
-        }
-
-        /// <summary>
-        /// Gets the list of tiles from the combination, sorted by wind logic for display.
-        /// </summary>
-        /// <param name="ownerWind">The current wind of the owner.</param>
-        /// <returns>List of tiles tuple; the second item is <c>True</c> when the tile is the opened one.</returns>
-        public List<Tuple<TilePivot, bool>> GetSortedTilesForDisplay(WindPivot ownerWind)
-        {
-            if (!StolenFrom.HasValue)
-            {
-                return Tiles.Select(t => new Tuple<TilePivot, bool>(t, false)).ToList();
-            }
-
-            var concealedOnly = new List<TilePivot>(_tiles);
-            concealedOnly.Remove(OpenTile);
-
-            int i = 0;
-
-            var tiles = new List<Tuple<TilePivot, bool>>
-            {
-                GetTileForSortedListAtSpecifiedWind(ownerWind.Left(), concealedOnly, ref i),
-                GetTileForSortedListAtSpecifiedWind(ownerWind.Opposite(), concealedOnly, ref i)
-            };
-
-            // For a square, the third tile is never from an opponent.
-            if (IsSquare)
-            {
-                tiles.Add(new Tuple<TilePivot, bool>(concealedOnly[i], false));
-                i++;
-            }
-
-            tiles.Add(GetTileForSortedListAtSpecifiedWind(ownerWind.Right(), concealedOnly, ref i));
-
-            return tiles;
-        }
-
-        #endregion Public methods
     }
 }

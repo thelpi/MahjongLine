@@ -183,15 +183,6 @@ namespace MahjongLineServer.Pivot
 
         #endregion Inferred properties
 
-        #region Events
-
-        /// <summary>
-        /// Event triggered when the tiles count in the wall changes.
-        /// </summary>
-        public event EventHandler NotifyWallCount;
-
-        #endregion Events
-
         #region Constructors
 
         /// <summary>
@@ -254,7 +245,6 @@ namespace MahjongLineServer.Pivot
 
             TilePivot tile = _wallTiles.First();
             _wallTiles.Remove(tile);
-            NotifyWallCount?.Invoke(null, null);
             _hands[CurrentPlayerIndex].Pick(tile);
             _waitForDiscard = true;
             return tile;
@@ -883,7 +873,6 @@ namespace MahjongLineServer.Pivot
             _deadTreasureTiles.Add(_wallTiles.Last());
 
             _wallTiles.RemoveAt(_wallTiles.Count - 1);
-            NotifyWallCount?.Invoke(null, null);
 
             _hands[CurrentPlayerIndex].Pick(compensationTile);
 

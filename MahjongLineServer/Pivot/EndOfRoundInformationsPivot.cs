@@ -139,21 +139,6 @@ namespace MahjongLineServer.Pivot
 
         #endregion Constructors
 
-        #region Public methods
-
-        /// <summary>
-        /// Get the <see cref="PlayerInformationsPivot.PointsGain"/> of the specified player index.
-        /// </summary>
-        /// <param name="playerIndex">Player index.</param>
-        /// <param name="defaultValue">Optionnal, value to return if player not found; default value is <c>0</c>.</param>
-        /// <returns>The points gain.</returns>
-        public int GetPlayerPointsGain(int playerIndex, int defaultValue = 0)
-        {
-            return PlayersInfo.FirstOrDefault(p => p.Index == playerIndex)?.PointsGain ?? defaultValue;
-        }
-
-        #endregion Public methods
-
         /// <summary>
         /// Represents informations relative to one player at the end of the round.
         /// </summary>
@@ -261,31 +246,6 @@ namespace MahjongLineServer.Pivot
                 : this(index, 0, 0, null, pointsGain, 0, 0, 0, 0) { }
 
             #endregion Constructors
-
-            #region Public methods
-
-            /// <summary>
-            /// Gets tiles from the hand (if <see cref="_hand"/> not <c>Null</c>) ordered for display on the score screen.
-            /// </summary>
-            /// <returns>The list of tiles;
-            /// the <see cref="Tuple{T1, T2, T3}.Item2"/> indicates if the tile should be displayed leaned.
-            /// the <see cref="Tuple{T1, T2, T3}.Item3"/> indicates if the tile should be displayed apart.
-            /// </returns>
-            public List<Tuple<TilePivot, bool, bool>> GetFullHandForDisplay()
-            {
-                List<Tuple<TilePivot, bool, bool>> r = new List<Tuple<TilePivot, bool, bool>>();
-
-                if (_hand != null)
-                {
-                    r.AddRange(_hand.AllTiles.Select(t => new Tuple<TilePivot, bool, bool>(t,
-                        _hand.DeclaredCombinations.Any(c => ReferenceEquals(c.OpenTile, t)),
-                        ReferenceEquals(_hand.LatestPick, t))));
-                }
-
-                return r.OrderBy(tuple => tuple.Item3).ToList();
-            }
-
-            #endregion Public methods
 
             #region Internal methods
 
