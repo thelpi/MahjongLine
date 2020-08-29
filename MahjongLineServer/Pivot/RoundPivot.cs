@@ -213,9 +213,10 @@ namespace MahjongLineServer.Pivot
                                 .GetCompleteSet(Game.WithRedDoras)
                                 .OrderBy(t => GlobalExtensions.Randomizer.NextDouble())
                                 .ToList();
-
+#if DEBUG
             // Add below specific calls to sort the draw
             // DrivenDrawPivot.HumanTenpai(_fullTilesList);
+#endif
 
             _hands = Enumerable.Range(0, 4).Select(i => new HandPivot(_fullTilesList.GetRange(i * 13, 13))).ToList();
             _discards = Enumerable.Range(0, 4).Select(i => new List<TilePivot>()).ToList();

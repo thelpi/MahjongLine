@@ -19,9 +19,13 @@ namespace MahjongLineServer.Pivot
         #endregion Constants
 
         #region Embedded properties
-        
-        private readonly List<PlayerPivot> _players;
 
+        private readonly List<PlayerPivot> _players = new List<PlayerPivot>();
+
+        /// <summary>
+        /// Game unique identifier.
+        /// </summary>
+        public Guid Id { get; }
         /// <summary>
         /// List of players.
         /// </summary>
@@ -114,7 +118,7 @@ namespace MahjongLineServer.Pivot
         }
 
         /// <summary>
-        /// 
+        /// Indicates if the game can start.
         /// </summary>
         public bool IsReadyToStart
         {
@@ -131,18 +135,17 @@ namespace MahjongLineServer.Pivot
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="humanPlayerName">The name of the human player; other players will be <see cref="PlayerPivot.IsCpu"/>.</param>
         /// <param name="initialPointsRule">The <see cref="InitialPointsRule"/> value.</param>
         /// <param name="endOfGameRule">The <see cref="EndOfGameRule"/> value.</param>
         /// <param name="withRedDoras">Optionnal; the <see cref="WithRedDoras"/> value; default value is <c>False</c>.</param>
         /// <param name="useNagashiMangan">Optionnal; the <see cref="UseNagashiMangan"/> value; default value is <c>False</c>.</param>
         /// <param name="useRenhou">Optionnal; the <see cref="UseRenhou"/> value; default value is <c>False</c>.</param>
-        public GamePivot(string humanPlayerName, InitialPointsRulePivot initialPointsRule, EndOfGameRulePivot endOfGameRule,
+        public GamePivot(InitialPointsRulePivot initialPointsRule, EndOfGameRulePivot endOfGameRule,
             bool withRedDoras = false, bool useNagashiMangan = false, bool useRenhou = false)
         {
+            Id = new Guid();
             InitialPointsRule = initialPointsRule;
             EndOfGameRule = endOfGameRule;
-            //_players = PlayerPivot.GetFourPlayers(humanPlayerName, InitialPointsRule);
             DominantWind = WindPivot.East;
             EastIndexTurnCount = 1;
             EastIndex = FirstEastIndex;
@@ -150,8 +153,6 @@ namespace MahjongLineServer.Pivot
             WithRedDoras = withRedDoras;
             UseNagashiMangan = useNagashiMangan;
             UseRenhou = useRenhou;
-
-            //Round = new RoundPivot(this, EastIndex);
         }
 
         #endregion Constructors
@@ -159,15 +160,57 @@ namespace MahjongLineServer.Pivot
         #region Public methods
 
         /// <summary>
+        /// Adds a player to the game.
+        /// </summary>
+        /// <param name="playerName">The player's name.</param>
+        /// <param name="isCpu"><c>True</c> for CPU player, <c>False</c> or human player.</param>
+        /// <returns><c>True</c> when <see cref="IsReadyToStart"/>; <c>False</c> otherwise.</returns>
+        public bool AddPlayer(string playerName, bool isCpu)
+        {
+            if (_players.Count == 4)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(playerName))
+            {
+                throw new ArgumentNullException(nameof(playerName));
+            }
+
+            if (_players.Any(p => p.Name.Trim().ToLowerInvariant() == playerName.Trim().ToLowerInvariant()))
+            {
+                throw new ArgumentException(Messages.InvalidPlayerName, nameof(playerName));
+            }
+
+            WindPivot? wind = null;
+            do
+            {
+                var rdmWind = (WindPivot)(GlobalExtensions.Randomizer.Next(0, 4));
+                if (!_players.Any(p => p.InitialWind == rdmWind))
+                {
+                    wind = rdmWind;
+                }
+            }
+            while (!wind.HasValue);
+
+            _players.Add(new PlayerPivot(playerName, wind.Value, InitialPointsRule, isCpu));
+
+            if (IsReadyToStart)
+            {
+                Round = new RoundPivot(this, EastIndex);
+            }
+
+            return IsReadyToStart;
+        }
+
+        /// <summary>
         /// Updates the current game configuration.
         /// </summary>
-        /// <param name="humanPlayerName"></param>
         /// <param name="withRedDoras">The new <see cref="WithRedDoras"/> value.</param>
         /// <param name="useNagashiMangan">The new <see cref="UseNagashiMangan"/> value.</param>
         /// <param name="useRenhou">The new <see cref="UseRenhou"/> value.</param>
-        public void UpdateConfiguration(string humanPlayerName, bool withRedDoras, bool useNagashiMangan, bool useRenhou)
+        public void UpdateConfiguration(bool withRedDoras, bool useNagashiMangan, bool useRenhou)
         {
-            PlayerPivot.UpdateHumanPlayerName(this, humanPlayerName);
             WithRedDoras = withRedDoras;
             UseNagashiMangan = useNagashiMangan;
             UseRenhou = useRenhou;

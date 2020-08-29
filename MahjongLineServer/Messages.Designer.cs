@@ -169,7 +169,7 @@ namespace MahjongLineServer {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à The name of the human player is invalid..
+        ///   Recherche une chaîne localisée semblable à The specified name is invalid..
         /// </summary>
         internal static string InvalidPlayerName {
             get {
