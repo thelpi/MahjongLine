@@ -135,5 +135,62 @@ namespace MahjongLineClient
                 return new Tuple<TilePivot, bool>(concealedOnly[i - 1], false);
             }
         }
+
+        /// <summary>
+        /// Overriden; provides a textual representation of the instance.
+        /// </summary>
+        /// <returns>Textual representation of the instance.</returns>
+        public override string ToString()
+        {
+            if (IsPair)
+            {
+                if (Family == FamilyPivot.Dragon)
+                {
+                    return $"Pair {Family} {Tiles.First().Dragon.Value.ToString()}";
+                }
+                else if (Family == FamilyPivot.Wind)
+                {
+                    return $"Pair {Family} {Tiles.First().Wind.Value.ToString()}";
+                }
+                else
+                {
+                    return $"Pair {Family} {Tiles.First().Number}";
+                }
+            }
+            else if (IsBrelan)
+            {
+                if (Family == FamilyPivot.Dragon)
+                {
+                    return $"Brelan {Family} {Tiles.First().Dragon.Value.ToString()}";
+                }
+                else if (Family == FamilyPivot.Wind)
+                {
+                    return $"Brelan {Family} {Tiles.First().Wind.Value.ToString()}";
+                }
+                else
+                {
+                    return $"Brelan {Family} {Tiles.First().Number}";
+                }
+            }
+            else if (IsSquare)
+            {
+                if (Family == FamilyPivot.Dragon)
+                {
+                    return $"Square {Family} {Tiles.First().Dragon.Value.ToString()}";
+                }
+                else if (Family == FamilyPivot.Wind)
+                {
+                    return $"Square {Family} {Tiles.First().Wind.Value.ToString()}";
+                }
+                else
+                {
+                    return $"Square {Family} {Tiles.First().Number}";
+                }
+            }
+            else
+            {
+                return $"Sequence {Family} [{Tiles.First().Number}, {Tiles.First().Number + 1}, {Tiles.First().Number + 2}]";
+            }
+        }
     }
 }

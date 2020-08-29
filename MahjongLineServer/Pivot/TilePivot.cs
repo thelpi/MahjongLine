@@ -237,23 +237,6 @@ namespace MahjongLineServer.Pivot
             return Equals(obj as TilePivot);
         }
 
-        /// <summary>
-        /// Overriden; provides a textual representation of the instance.
-        /// </summary>
-        /// <returns>Textual representation of the instance.</returns>
-        public override string ToString()
-        {
-            switch (Family)
-            {
-                case FamilyPivot.Dragon:
-                    return $"{Family.ToString().ToLowerInvariant()}_{Dragon.Value.ToString().ToLowerInvariant()}";
-                case FamilyPivot.Wind:
-                    return $"{Family.ToString().ToLowerInvariant()}_{Wind.Value.ToString().ToLowerInvariant()}";
-                default:
-                    return $"{Family.ToString().ToLowerInvariant()}_{Number.ToString()}" + (IsRedDora ? "_red" : string.Empty);
-            }
-        }
-
         #endregion Interfaces implementation and overrides from base
 
         #region Static methods

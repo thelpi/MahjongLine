@@ -290,63 +290,6 @@ namespace MahjongLineServer.Pivot
             return Equals(obj as TileComboPivot);
         }
 
-        /// <summary>
-        /// Overriden; provides a textual representation of the instance.
-        /// </summary>
-        /// <returns>Textual representation of the instance.</returns>
-        public override string ToString()
-        {
-            if (IsPair)
-            {
-                if (Family == FamilyPivot.Dragon)
-                {
-                    return $"Pair {Family} {_tiles[0].Dragon.Value.ToString()}";
-                }
-                else if (Family == FamilyPivot.Wind)
-                {
-                    return $"Pair {Family} {_tiles[0].Wind.Value.ToString()}";
-                }
-                else
-                {
-                    return $"Pair {Family} {_tiles[0].Number}";
-                }
-            }
-            else if (IsBrelan)
-            {
-                if (Family == FamilyPivot.Dragon)
-                {
-                    return $"Brelan {Family} {_tiles[0].Dragon.Value.ToString()}";
-                }
-                else if (Family == FamilyPivot.Wind)
-                {
-                    return $"Brelan {Family} {_tiles[0].Wind.Value.ToString()}";
-                }
-                else
-                {
-                    return $"Brelan {Family} {_tiles[0].Number}";
-                }
-            }
-            else if (IsSquare)
-            {
-                if (Family == FamilyPivot.Dragon)
-                {
-                    return $"Square {Family} {_tiles[0].Dragon.Value.ToString()}";
-                }
-                else if (Family == FamilyPivot.Wind)
-                {
-                    return $"Square {Family} {_tiles[0].Wind.Value.ToString()}";
-                }
-                else
-                {
-                    return $"Square {Family} {_tiles[0].Number}";
-                }
-            }
-            else
-            {
-                return $"Sequence {Family} [{_tiles[0].Number}, {_tiles[1].Number}, {_tiles[2].Number}]";
-            }
-        }
-
         #endregion Interfaces implementation and overrides from base
 
         #region Private methods
