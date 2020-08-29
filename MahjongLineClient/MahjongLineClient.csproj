@@ -69,15 +69,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnglePivot.cs" />
-    <Compile Include="App.xaml.cs" />
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AutoPlayResult.cs" />
     <Compile Include="ChronoPivot.cs" />
     <Compile Include="CpuSpeedPivot.cs" />
-    <Compile Include="EndOfGameWindow.xaml.cs" />
+    <Compile Include="EndOfGameWindow.xaml.cs">
+      <DependentUpon>EndOfGameWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Extensions.cs" />
     <Compile Include="GraphicTools.cs" />
-    <Compile Include="IntroWindow.xaml.cs" />
-    <Compile Include="MainWindow.xaml.cs" />
+    <Compile Include="IntroWindow.xaml.cs">
+      <DependentUpon>IntroWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PanelButton.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -93,7 +101,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="RequestManager.cs" />
-    <Compile Include="ScoreWindow.xaml.cs" />
+    <Compile Include="ScoreWindow.xaml.cs">
+      <DependentUpon>ScoreWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\EndOfRoundPlayerInformationsPivot.cs" />
     <Compile Include="ViewModel\Enum\DragonPivot.cs" />
     <Compile Include="ViewModel\Enum\DrawTypePivot.cs" />
