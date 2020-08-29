@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MahjongLineServer.Controllers.Exceptions;
 using MahjongLineServer.Controllers.Requests;
 using MahjongLineServer.Pivot;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,9 @@ namespace MahjongLineServer.Controllers
         private static readonly List<GamePivot> _games = new List<GamePivot>();
 
         /// <summary>
-        /// 
+        /// Creates a new game.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Game creation request.</returns>
         [HttpPost]
         public ActionResult CreateNewGame([FromBody] CreateGameRequest request)
         {
@@ -51,15 +52,54 @@ namespace MahjongLineServer.Controllers
                 return BadRequest();
             }
 
-            GamePivot game = _games.FirstOrDefault(g => g.Id == guid);
-            if (game == null)
-            {
-                return NotFound();
-            }
+            GamePivot game = CheckGame(guid);
 
             game.AddPlayer(request.PlayerName, request.IsCpu);
 
             return Ok(game);
+        }
+
+        /// <summary>
+        /// Gets players rankings.
+        /// </summary>
+        /// <param name="guid">The game GUID.</param>
+        /// <returns>Collection of <see cref="PlayerScorePivot"/>.</returns>
+        [HttpGet("{guid}/rankings")]
+        public ActionResult ComputeRankings([FromRoute] Guid guid)
+        {
+            return Ok(ScoreTools.ComputeCurrentRanking(CheckGame(guid)));
+        }
+
+        /// <summary>
+        /// Gets current wind for specified player.
+        /// </summary>
+        /// <param name="guid">The game GUID.</param>
+        /// <param name="playerIndex">The player index.</param>
+        /// <returns>Current <see cref="WindPivot"/>.</returns>
+        [HttpGet("{guid}/players/{playerIndex}/winds")]
+        public ActionResult GetPlayerCurrentWind([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        {
+            return Ok(CheckGame(guid).GetPlayerCurrentWind(CheckPlayerIndex(playerIndex)));
+        }
+
+        private static int CheckPlayerIndex(int playerIndex)
+        {
+            if (playerIndex < 0 || playerIndex > 3)
+            {
+                throw new InvalidPlayerIndexException(playerIndex);
+            }
+            return playerIndex;
+        }
+
+        private static GamePivot CheckGame(Guid guid)
+        {
+            GamePivot game = _games.FirstOrDefault(g => g.Id == guid);
+            if (game == null)
+            {
+                throw new InvalidGameIdentifierException(guid);
+            }
+
+            return game;
         }
     }
 }

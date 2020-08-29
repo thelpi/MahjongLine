@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MahjongLineClient
@@ -67,5 +68,77 @@ namespace MahjongLineClient
         /// Inferred; count of visible doras.
         /// </summary>
         public int VisibleDorasCount { get; set; }
+        /// <summary>
+        /// Collection of <see cref="HandPivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<HandPivot> Hands { get; set; }
+        /// <summary>
+        /// Discard tiles for every player.
+        /// </summary>
+        public IReadOnlyCollection<IReadOnlyCollection<TilePivot>> Discards { get; set; }
+
+        /// <summary>
+        /// Checks if the specified player is riichi.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns><c>True</c> if riichi; <c>False</c> otherwise.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="playerIndex"/> is out of range.</exception>
+        public bool IsRiichi(int playerIndex)
+        {
+            if (playerIndex < 0 || playerIndex > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(playerIndex));
+            }
+
+            return Riichis.ElementAt(playerIndex) != null;
+        }
+
+        /// <summary>
+        /// Gets the hand of a specified player.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns>Instance of <see cref="HandPivot"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="playerIndex"/> should be between 0 and 3.</exception>
+        public HandPivot GetHand(int playerIndex)
+        {
+            if (playerIndex < 0 || playerIndex > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(playerIndex));
+            }
+
+            return Hands.ElementAt(playerIndex);
+        }
+
+        /// <summary>
+        /// Gets the discard of a specified player.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns>Collection of discarded <see cref="TilePivot"/> instances.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="playerIndex"/> should be between 0 and 3.</exception>
+        public IReadOnlyCollection<TilePivot> GetDiscard(int playerIndex)
+        {
+            if (playerIndex < 0 || playerIndex > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(playerIndex));
+            }
+
+            return Discards.ElementAt(playerIndex);
+        }
+
+        /// <summary>
+        /// Checks, for a specified player, if the specified rank is the one when the riichi call has been made.
+        /// </summary>
+        /// <param name="playerIndex">The player index.</param>
+        /// <param name="rank">The rank.</param>
+        /// <returns><c>True</c> if the specified rank is the riichi one.</returns>
+        public bool IsRiichiRank(int playerIndex, int rank)
+        {
+            if (playerIndex < 0 || playerIndex > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(playerIndex));
+            }
+
+            return Riichis.ElementAt(playerIndex) != null && Riichis.ElementAt(playerIndex).DiscardRank == rank;
+        }
     }
 }

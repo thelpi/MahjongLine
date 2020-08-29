@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using MahjongLineServer.Controllers.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -15,9 +16,16 @@ namespace MahjongLineServer.Controllers.Filters
         {
             if (context?.Exception != null)
             {
+                var statusCode = HttpStatusCode.InternalServerError;
+                if (context.Exception.GetType() == typeof(InvalidGameIdentifierException)
+                    || context.Exception.GetType() == typeof(InvalidPlayerIndexException))
+                {
+                    statusCode = HttpStatusCode.BadRequest;
+                }
+
                 context.Result = new ContentResult
                 {
-                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    StatusCode = (int)statusCode,
                     Content = context.Exception.Message,
                     ContentType = "text/plain",
                 };

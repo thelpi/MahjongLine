@@ -19,7 +19,7 @@ namespace MahjongLineClient
         private const string WINDOW_TITLE = "MahjongLine";
 
         private readonly RequestManager _requestManager;
-        private readonly GamePivot _game;
+        private GamePivot _game;
         private System.Media.SoundPlayer _tickSound;
         private System.Timers.Timer _timer;
         private System.Timers.ElapsedEventHandler _currentTimerHandler;
@@ -44,7 +44,12 @@ namespace MahjongLineClient
 
             _requestManager = requestManager ?? throw new ArgumentNullException(nameof(requestManager));
 
-            _game = _requestManager.CreateGame(pointRule, endOfGameRule, useRedDoras, useNagashiMangan, useRenhou);
+            _game = _requestManager.CreateGame(playerName, pointRule, endOfGameRule, useRedDoras, useNagashiMangan, useRenhou);
+            _requestManager.NotifyGameRefresh += delegate(object sender, EventArgs e)
+            {
+                _game = sender as GamePivot;
+            };
+
             _tickSound = new System.Media.SoundPlayer(Properties.Resources.tick);
 
             _overlayStoryboard = FindResource("StbHideOverlay") as Storyboard;
@@ -865,11 +870,11 @@ namespace MahjongLineClient
             this.FindPanel("StpPickP", pIndex).Children.Clear();
 
             panel.Children.Clear();
-            foreach (TilePivot tile in _requestManager.GetHand(pIndex).ConcealedTiles)
+            foreach (TilePivot tile in _game.Round.GetHand(pIndex).ConcealedTiles)
             {
                 if (pickTile == null || !ReferenceEquals(pickTile, tile))
                 {
-                    panel.Children.Add(tile.GenerateTileButton(isHuman && !_requestManager.IsRiichi(pIndex) ?
+                    panel.Children.Add(tile.GenerateTileButton(isHuman && !_game.Round.IsRiichi(pIndex) ?
                         BtnDiscard_Click : (RoutedEventHandler)null, (AnglePivot)pIndex, !isHuman && !Properties.Settings.Default.DebugMode));
                 }
             }
@@ -942,12 +947,12 @@ namespace MahjongLineClient
             bool reversed = pIndex == 1 || pIndex == 2;
 
             int i = 0;
-            foreach (TilePivot tile in _requestManager.GetDiscard(pIndex))
+            foreach (TilePivot tile in _game.Round.GetDiscard(pIndex))
             {
                 int r = i < 6 ? 1 : (i < 12 ? 2 : 3);
                 Panel panel = this.FindPanel($"StpDiscard{r}P", pIndex);
                 AnglePivot angle = (AnglePivot)pIndex;
-                if (_requestManager.IsRiichiRank(pIndex, i))
+                if (_game.Round.IsRiichiRank(pIndex, i))
                 {
                     angle = (AnglePivot)pIndex.RelativePlayerIndex(1);
                 }
@@ -969,7 +974,7 @@ namespace MahjongLineClient
             Panel panel = this.FindPanel("StpCombosP", pIndex);
 
             panel.Children.Clear();
-            foreach (TileComboPivot combo in _requestManager.GetHand(pIndex).DeclaredCombinations)
+            foreach (TileComboPivot combo in _game.Round.GetHand(pIndex).DeclaredCombinations)
             {
                 panel.Children.Add(CreateCombinationPanel(pIndex, combo));
             }

@@ -16,7 +16,7 @@ namespace MahjongLineClient
         {
             InitializeComponent();
 
-            List<PlayerScorePivot> playerScores = requestManager.ComputeCurrentRanking(game);
+            List<PlayerScorePivot> playerScores = requestManager.ComputeCurrentRanking(game.Id);
             for (int i = 0; i < playerScores.Count; i++)
             {
                 this.FindControl("LblRank", i).Content = playerScores[i].Rank;

@@ -28,6 +28,27 @@ namespace MahjongLineServer.Pivot
         private readonly List<TilePivot> _fullTilesList;
 
         /// <summary>
+        /// Discard tiles for every player.
+        /// </summary>
+        public IReadOnlyCollection<IReadOnlyCollection<TilePivot>> Discards
+        {
+            get
+            {
+                return _discards;
+            }
+        }
+        /// <summary>
+        /// Collection of <see cref="HandPivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<HandPivot> Hands
+        {
+            get
+            {
+                return _hands;
+            }
+        }
+
+        /// <summary>
         /// History of the latest players to play.
         /// First on the list is the latest to play.
         /// The list is cleared when a jump (ie a call) is made.
