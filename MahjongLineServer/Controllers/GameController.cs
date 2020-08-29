@@ -12,7 +12,7 @@ namespace MahjongLineServer.Controllers
     /// </summary>
     /// <seealso cref="Controller"/>
     [Produces("application/json")]
-    [Route("api/Game")]
+    [Route("games")]
     public class GameController : Controller
     {
         private static readonly List<GamePivot> _games = new List<GamePivot>();

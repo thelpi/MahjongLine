@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace MahjongLineClient
 {
@@ -10,9 +11,14 @@ namespace MahjongLineClient
         /// </summary>
         public event EventHandler NotifyWallCount;
 
+        private readonly HttpClient _client;
+
         public RequestManager()
         {
-            // something to do
+            _client = new HttpClient
+            {
+                BaseAddress = new Uri(Properties.Settings.Default.ServerUrl)
+            };
         }
 
         #region Idempotent
@@ -137,7 +143,21 @@ namespace MahjongLineClient
 
         public GamePivot CreateGame(InitialPointsRulePivot pointRule, EndOfGameRulePivot endOfGameRule, bool useRedDoras, bool useNagashiMangan, bool useRenhou)
         {
-            throw new NotImplementedException();
+            var game = SendQuery<GamePivot>(HttpMethod.Post, "games", new
+            {
+                InitialPointsRule = pointRule,
+                EndOfGameRule = endOfGameRule,
+                WithRedDoras = useRedDoras,
+                UseNagashiMangan = useNagashiMangan,
+                UseRenhou = useRenhou
+            });
+
+            game = SendQuery<GamePivot>(HttpMethod.Post, $"games/{game.Id.ToString()}/players", new { PlayerName = "HUMAN", IsCpu = false });
+            game = SendQuery<GamePivot>(HttpMethod.Post, $"games/{game.Id.ToString()}/players", new { PlayerName = "CPU_1", IsCpu = true });
+            game = SendQuery<GamePivot>(HttpMethod.Post, $"games/{game.Id.ToString()}/players", new { PlayerName = "CPU_2", IsCpu = true });
+            game = SendQuery<GamePivot>(HttpMethod.Post, $"games/{game.Id.ToString()}/players", new { PlayerName = "CPU_3", IsCpu = true });
+
+            return game;
         }
 
         public EndOfRoundInformationsPivot NextRound(int? ronPlayerId)
@@ -183,5 +203,22 @@ namespace MahjongLineClient
         }
 
         #endregion Not idempotent
+
+        private T SendQuery<T>(HttpMethod method, string route, object content = null)
+        {
+            var response = _client.SendAsync(new HttpRequestMessage
+            {
+                Content = content == null ? null :
+                    new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(content), System.Text.Encoding.UTF8, "application/json"),
+                Method = method,
+                RequestUri = new Uri(route, UriKind.Relative)
+            }).GetAwaiter().GetResult();
+
+            response.EnsureSuccessStatusCode();
+
+            string jsonContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(jsonContent);
+        }
     }
 }

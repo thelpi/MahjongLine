@@ -92,7 +92,7 @@ namespace MahjongLineServer.Pivot
         {
             get
             {
-                return _players[EastIndex];
+                return EastIndex >= 0 && _players.Count > EastIndex ? _players[EastIndex] : null;
             }
         }
         /// <summary>
@@ -143,7 +143,7 @@ namespace MahjongLineServer.Pivot
         public GamePivot(InitialPointsRulePivot initialPointsRule, EndOfGameRulePivot endOfGameRule,
             bool withRedDoras = false, bool useNagashiMangan = false, bool useRenhou = false)
         {
-            Id = new Guid();
+            Id = Guid.NewGuid();
             InitialPointsRule = initialPointsRule;
             EndOfGameRule = endOfGameRule;
             DominantWind = WindPivot.East;
@@ -197,6 +197,7 @@ namespace MahjongLineServer.Pivot
 
             if (IsReadyToStart)
             {
+                EastIndex = _players.FindIndex(p => p.InitialWind == WindPivot.East);
                 Round = new RoundPivot(this, EastIndex);
             }
 
