@@ -15,22 +15,14 @@ namespace MahjongLineClient
             // something to do
         }
 
+        #region Idempotent
+
         public List<PlayerScorePivot> ComputeCurrentRanking(GamePivot game)
         {
             throw new NotImplementedException();
         }
 
-        public GamePivot CreateGame(InitialPointsRulePivot pointRule, EndOfGameRulePivot endOfGameRule, bool useRedDoras, bool useNagashiMangan, bool useRenhou)
-        {
-            throw new NotImplementedException();
-        }
-
         public WindPivot GetPlayerCurrentWind(int pIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public EndOfRoundInformationsPivot NextRound(int? ronPlayerId)
         {
             throw new NotImplementedException();
         }
@@ -55,23 +47,7 @@ namespace MahjongLineClient
             throw new NotImplementedException();
         }
 
-        public bool CallChii(int startNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-        public TilePivot CallKan(int playerIndex, TilePivot tileChoice = null)
-        {
-            // do something about the wall
-            throw new NotImplementedException();
-        }
-
-        public void UndoPickCompensationTile()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CallPon(int playerIndex)
+        public bool HumanCanAutoDiscard()
         {
             throw new NotImplementedException();
         }
@@ -96,28 +72,7 @@ namespace MahjongLineClient
             throw new NotImplementedException();
         }
 
-        public bool Discard(TilePivot tile)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool HumanCanAutoDiscard()
-        {
-            throw new NotImplementedException();
-        }
-
         public bool CanDiscard(TilePivot tile)
-        {
-            throw new NotImplementedException();
-        }
-
-        public TilePivot Pick()
-        {
-            // so something about the wall
-            throw new NotImplementedException();
-        }
-
-        public bool CallRiichi(TilePivot tile)
         {
             throw new NotImplementedException();
         }
@@ -136,6 +91,8 @@ namespace MahjongLineClient
         {
             throw new NotImplementedException();
         }
+
+        #region IA decisions
 
         public Tuple<int, TilePivot> KanDecision(bool checkConcealedOnly)
         {
@@ -171,5 +128,60 @@ namespace MahjongLineClient
         {
             throw new NotImplementedException();
         }
+
+        #endregion IA decisions
+
+        #endregion Idempotent
+
+        #region Not idempotent
+
+        public GamePivot CreateGame(InitialPointsRulePivot pointRule, EndOfGameRulePivot endOfGameRule, bool useRedDoras, bool useNagashiMangan, bool useRenhou)
+        {
+            throw new NotImplementedException();
+        }
+
+        public EndOfRoundInformationsPivot NextRound(int? ronPlayerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TilePivot Pick()
+        {
+            NotifyWallCount?.Invoke(null, null);
+            throw new NotImplementedException();
+        }
+
+        public bool CallRiichi(TilePivot tile)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CallChii(int startNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TilePivot CallKan(int playerIndex, TilePivot tileChoice = null)
+        {
+            NotifyWallCount?.Invoke(null, null);
+            throw new NotImplementedException();
+        }
+
+        public void UndoPickCompensationTile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CallPon(int playerIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Discard(TilePivot tile)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion Not idempotent
     }
 }
