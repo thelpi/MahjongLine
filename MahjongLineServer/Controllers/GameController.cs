@@ -99,7 +99,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="ronPlayerId">Ron player index; if any.</param>
         /// <returns>Instance of <see cref="EndOfRoundInformationsPivot"/>.</returns>
-        [HttpPatch("{guid}/rounds?ronPlayerId={ronPlayerId}")]
+        [HttpPatch("{guid}/rounds")]
         public ActionResult NextRound([FromRoute] Guid guid, [FromQuery] int? ronPlayerId)
         {
             return Ok(CheckGame(guid).NextRound(CheckPlayerIndex(ronPlayerId)));
@@ -122,7 +122,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="tileIndexInPlayerHand">Tile index in player hand.</param>
         /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/calls/riichi?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        [HttpPatch("{guid}/calls/riichi")]
         public ActionResult CallRiichi([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
         {
             RoundPivot round = CheckGame(guid).Round;
@@ -136,7 +136,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="startNumber">Tile number of the first tile of the sequence.</param>
         /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/calls/chii?startNumber={startNumber}")]
+        [HttpPatch("{guid}/calls/chii")]
         public ActionResult CallChii([FromRoute] Guid guid, [FromQuery] int startNumber)
         {
             return Ok(CheckGame(guid).Round.CallChii(startNumber));
@@ -149,7 +149,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="playerIndex">Player index.</param>
         /// <param name="tileIndexInPlayerHand">Optionnal tile index.</param>
         /// <returns>The compensation tile.</returns>
-        [HttpPatch("{guid}/players/{playerIndex}/calls/kan?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        [HttpPatch("{guid}/players/{playerIndex}/calls/kan")]
         public ActionResult CallKan([FromRoute] Guid guid, [FromRoute] int playerIndex, [FromQuery] int? tileIndexInPlayerHand)
         {
             RoundPivot round = CheckGame(guid).Round;
@@ -187,7 +187,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="tileIndexInPlayerHand">Tile index in the current player hand.</param>
         /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        [HttpPatch("{guid}/calls/discard")]
         public ActionResult Discard([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
         {
             RoundPivot round = CheckGame(guid).Round;
@@ -201,7 +201,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="isKanCompensation"><c>1</c> if kan compensation; <c>0</c> otherwise.</param>
         /// <returns><c>True</c> if can tsumo; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/check-calls/tsumo?isKanCompensation={isKanCompensation}")]
+        [HttpGet("{guid}/check-calls/tsumo")]
         public ActionResult CanCallTsumo([FromRoute] Guid guid, [FromQuery] byte isKanCompensation)
         {
             return Ok(CheckGame(guid).Round.CanCallTsumo(isKanCompensation > 0));
@@ -270,7 +270,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="tileIndexInPlayerHand">Tiles index in player hand.</param>
         /// <returns><c>True</c> if tile can be discarded; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/check-calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        [HttpGet("{guid}/check-calls/discard")]
         public ActionResult CanDiscard([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
         {
             RoundPivot round = CheckGame(guid).Round;
@@ -308,7 +308,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="checkConcealedOnly"><c>1</c> if only concealed should be checked; <c>0</c> otherwise.</param>
         /// <returns>Kan informations, if any.</returns>
-        [HttpGet("{guid}/cpu-check-calls/kan?checkConcealedOnly={checkConcealedOnly}")]
+        [HttpGet("{guid}/cpu-check-calls/kan")]
         public ActionResult KanDecision([FromRoute] Guid guid, [FromQuery] byte checkConcealedOnly)
         {
             return Ok(CheckGame(guid).Round.IaManager.KanDecision(checkConcealedOnly > 0));
@@ -320,7 +320,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="ronCalled"><c>1</c> if ron has already been called; <c>0</c> otherwise.</param>
         /// <returns>List of player index who proceed to call ron.</returns>
-        [HttpGet("{guid}/cpu-check-calls/ron?ronCalled={ronCalled}")]
+        [HttpGet("{guid}/cpu-check-calls/ron")]
         public ActionResult RonDecision([FromRoute] Guid guid, [FromQuery] byte ronCalled)
         {
             return Ok(CheckGame(guid).Round.IaManager.RonDecision(ronCalled > 0));
@@ -343,7 +343,7 @@ namespace MahjongLineServer.Controllers
         /// <param name="guid">Game identifier.</param>
         /// <param name="isKanCompensation"><c>1</c> if kan compensation; <c>0</c> otherwise.</param>
         /// <returns><c>True</c> if tsumo; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/cpu-check-calls/tsumo?isKanCompensation={isKanCompensation}")]
+        [HttpGet("{guid}/cpu-check-calls/tsumo")]
         public ActionResult TsumoDecision([FromRoute] Guid guid, [FromQuery] byte isKanCompensation)
         {
             return Ok(CheckGame(guid).Round.IaManager.TsumoDecision(isKanCompensation > 0));
