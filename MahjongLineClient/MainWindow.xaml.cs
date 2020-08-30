@@ -278,112 +278,118 @@ namespace MahjongLineClient
             };
             _autoPlay.DoWork += delegate (object sender, DoWorkEventArgs evt)
             {
-                object[] argumentsList = evt.Argument as object[];
-                bool skipCurrentAction = (bool)argumentsList[0];
-                bool humanRonPending = (bool)argumentsList[1];
-                Tuple<int, TilePivot, int?> kanInProgress = null;
                 AutoPlayResult result = new AutoPlayResult
                 {
                     EndOfRound = false,
                     PanelButton = null,
                     RonPlayerId = null
                 };
-                while (true && !_hardStopAutoplay)
+                try
                 {
-                    if (!skipCurrentAction && !humanRonPending && _requestManager.CanCallRon(GamePivot.HUMAN_INDEX))
+                    object[] argumentsList = evt.Argument as object[];
+                    bool skipCurrentAction = (bool)argumentsList[0];
+                    bool humanRonPending = (bool)argumentsList[1];
+                    Tuple<int, TilePivot, int?> kanInProgress = null;
+                    while (true && !_hardStopAutoplay)
                     {
-                        Dispatcher.Invoke(() =>
+                        if (!skipCurrentAction && !humanRonPending && _requestManager.CanCallRon(GamePivot.HUMAN_INDEX))
                         {
-                            BtnRon.Visibility = Visibility.Visible;
-                        });
-                        ActivateTimer(null);
-                        if (Properties.Settings.Default.AutoCallMahjong)
-                        {
-                            result.PanelButton = new PanelButton("BtnRon", -1);
+                            Dispatcher.Invoke(() =>
+                            {
+                                BtnRon.Visibility = Visibility.Visible;
+                            });
+                            ActivateTimer(null);
+                            if (Properties.Settings.Default.AutoCallMahjong)
+                            {
+                                result.PanelButton = new PanelButton("BtnRon", -1);
+                            }
+                            break;
                         }
-                        break;
-                    }
 
-                    if (CheckOpponensRonCall(humanRonPending))
-                    {
-                        result.EndOfRound = true;
-                        result.RonPlayerId = kanInProgress != null ? kanInProgress.Item1 : _game.Round.PreviousPlayerIndex;
+                        if (CheckOpponensRonCall(humanRonPending))
+                        {
+                            result.EndOfRound = true;
+                            result.RonPlayerId = kanInProgress != null ? kanInProgress.Item1 : _game.Round.PreviousPlayerIndex;
+                            if (kanInProgress != null)
+                            {
+                                _requestManager.UndoPickCompensationTile();
+                            }
+                            break;
+                        }
+
                         if (kanInProgress != null)
                         {
-                            _requestManager.UndoPickCompensationTile();
+                            CommonCallKan(kanInProgress.Item3, kanInProgress.Item2);
                         }
-                        break;
-                    }
 
-                    if (kanInProgress != null)
-                    {
-                        CommonCallKan(kanInProgress.Item3, kanInProgress.Item2);
-                    }
-
-                    if (!skipCurrentAction && _requestManager.CanCallPonOrKan(GamePivot.HUMAN_INDEX))
-                    {
-                        break;
-                    }
-
-                    Tuple<int, TilePivot> opponentWithKanTilePick = _requestManager.KanDecision(false);
-                    if (opponentWithKanTilePick != null)
-                    {
-                        int previousPlayerIndex = _game.Round.PreviousPlayerIndex;
-                        TilePivot compensationTile = OpponentBeginCallKan(opponentWithKanTilePick.Item1, opponentWithKanTilePick.Item2, false, false);
-                        kanInProgress = new Tuple<int, TilePivot, int?>(opponentWithKanTilePick.Item1, compensationTile, previousPlayerIndex);
-                        continue;
-                    }
-
-                    int opponentPlayerId = _requestManager.PonDecision();
-                    if (opponentPlayerId > -1)
-                    {
-                        PonCall(opponentPlayerId);
-                        continue;
-                    }
-
-                    if (!skipCurrentAction && _game.Round.IsHumanPlayer && _requestManager.CanCallChii().Count > 0)
-                    {
-                        break;
-                    }
-
-                    Tuple<TilePivot, bool> chiiTilePick = _requestManager.ChiiDecision();
-                    if (chiiTilePick != null)
-                    {
-                        ChiiCall(chiiTilePick);
-                        continue;
-                    }
-
-                    if (kanInProgress != null)
-                    {
-                        if (OpponentAfterPick(ref kanInProgress))
+                        if (!skipCurrentAction && _requestManager.CanCallPonOrKan(GamePivot.HUMAN_INDEX))
                         {
                             break;
                         }
-                        continue;
-                    }
 
-                    if (_game.Round.IsWallExhaustion)
-                    {
-                        result.EndOfRound = true;
-                        break;
-                    }
+                        Tuple<int, TilePivot> opponentWithKanTilePick = _requestManager.KanDecision(false);
+                        if (opponentWithKanTilePick != null)
+                        {
+                            int previousPlayerIndex = _game.Round.PreviousPlayerIndex;
+                            TilePivot compensationTile = OpponentBeginCallKan(opponentWithKanTilePick.Item1, opponentWithKanTilePick.Item2, false, false);
+                            kanInProgress = new Tuple<int, TilePivot, int?>(opponentWithKanTilePick.Item1, compensationTile, previousPlayerIndex);
+                            continue;
+                        }
 
-                    if (_game.Round.IsHumanPlayer)
-                    {
-                        result.PanelButton = HumanAutoPlay();
-                        break;
-                    }
-                    else
-                    {
-                        Pick();
-                        if (OpponentAfterPick(ref kanInProgress))
+                        int opponentPlayerId = _requestManager.PonDecision();
+                        if (opponentPlayerId > -1)
+                        {
+                            PonCall(opponentPlayerId);
+                            continue;
+                        }
+
+                        if (!skipCurrentAction && _game.Round.IsHumanPlayer && _requestManager.CanCallChii().Count > 0)
+                        {
+                            break;
+                        }
+
+                        Tuple<TilePivot, bool> chiiTilePick = _requestManager.ChiiDecision();
+                        if (chiiTilePick != null)
+                        {
+                            ChiiCall(chiiTilePick);
+                            continue;
+                        }
+
+                        if (kanInProgress != null)
+                        {
+                            if (OpponentAfterPick(ref kanInProgress))
+                            {
+                                break;
+                            }
+                            continue;
+                        }
+
+                        if (_game.Round.IsWallExhaustion)
                         {
                             result.EndOfRound = true;
                             break;
                         }
+
+                        if (_game.Round.IsHumanPlayer)
+                        {
+                            result.PanelButton = HumanAutoPlay();
+                            break;
+                        }
+                        else
+                        {
+                            Pick();
+                            if (OpponentAfterPick(ref kanInProgress))
+                            {
+                                result.EndOfRound = true;
+                                break;
+                            }
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
 
+                }
                 evt.Result = result;
             };
             _autoPlay.RunWorkerCompleted += delegate (object sender, RunWorkerCompletedEventArgs evt)
@@ -891,7 +897,7 @@ namespace MahjongLineClient
             }
         }
 
-        private void OnTilePickedInWall(int playerIndex, TilePivot tile)
+        private void OnTilePickedInWall(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.PlaySounds)
             {
@@ -899,7 +905,7 @@ namespace MahjongLineClient
             }
             Dispatcher.Invoke(() =>
             {
-                FillHandPanel(playerIndex, tile);
+                FillHandPanel(_game.Round.CurrentPlayerIndex, sender as TilePivot);
             });
         }
 
@@ -908,6 +914,7 @@ namespace MahjongLineClient
         {
             LblWallTilesLeft.Foreground = System.Windows.Media.Brushes.Black;
             _requestManager.NotifyWallCount += OnNotifyWallCount;
+            _requestManager.NotifyWallCount += OnTilePickedInWall;
             OnNotifyWallCount(null, null);
 
             StpDoras.SetDorasPanel(_game.Round.DoraIndicatorTiles, _game.Round.VisibleDorasCount);

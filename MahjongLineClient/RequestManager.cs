@@ -159,7 +159,7 @@ namespace MahjongLineClient
         {
             TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/calls/pick");
             RefreshGame();
-            NotifyWallCount?.Invoke(null, null);
+            NotifyWallCount?.Invoke(result, null);
             return result;
         }
 
@@ -181,7 +181,7 @@ namespace MahjongLineClient
         {
             TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/kan?tileIndexInPlayerHand={tileIndexInPlayerHand}");
             RefreshGame();
-            NotifyWallCount?.Invoke(null, null);
+            NotifyWallCount?.Invoke(result, null);
             return result;
         }
 
