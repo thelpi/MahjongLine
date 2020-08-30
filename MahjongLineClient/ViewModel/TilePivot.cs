@@ -1,10 +1,18 @@
-﻿namespace MahjongLineClient
+﻿using System;
+
+namespace MahjongLineClient
 {
     /// <summary>
     /// Represents a tile.
     /// </summary>
-    public class TilePivot
+    /// <seealso cref="IEquatable{T}"/>
+    /// <seealso cref="IComparable{T}"/>
+    public class TilePivot : IEquatable<TilePivot>, IComparable<TilePivot>
     {
+        /// <summary>
+        /// Tile unique identifier.
+        /// </summary>
+        public Guid Id { get; }
         /// <summary>
         /// Family.
         /// </summary>
@@ -41,36 +49,153 @@
         /// </summary>
         public bool IsHonorOrTerminal { get; set; }
 
+        #region Interfaces implementation and overrides from base
+
         /// <summary>
-        /// Overriden; provides a textual representation of the instance.
+        /// Overriden; checks equality between an instance of <see cref="TilePivot"/> and any object.
         /// </summary>
-        /// <returns>Textual representation of the instance.</returns>
-        public override string ToString()
+        /// <param name="tile">The <see cref="TilePivot"/> instance.</param>
+        /// <param name="obj">Any <see cref="object"/>.</param>
+        /// <returns><c>True</c> if instances are equal or both <c>Null</c>; <c>False</c> otherwise.</returns>
+        public static bool operator ==(TilePivot tile, object obj)
         {
+            return tile is null ? obj is null : tile.Equals(obj);
+        }
+
+        /// <summary>
+        /// Overriden; checks inequality between an instance of <see cref="TilePivot"/> and any object.
+        /// </summary>
+        /// <param name="tile">The <see cref="TilePivot"/> instance.</param>
+        /// <param name="obj">Any <see cref="object"/>.</param>
+        /// <returns><c>False</c> if instances are equal or both <c>Null</c>; <c>True</c> otherwise.</returns>
+        public static bool operator !=(TilePivot tile, object obj)
+        {
+            return !(tile == obj);
+        }
+
+        /// <summary>
+        /// Compares this instance with another one.
+        /// </summary>
+        /// <param name="other">The second instance.</param>
+        /// <returns>
+        /// <c>-1</c> if this instance precedes <paramref name="other"/>.
+        /// <c>0</c> if this instance is equal to <paramref name="other"/>.
+        /// <c>1</c> if <paramref name="other"/> precedes this instance.
+        /// </returns>
+        public int CompareTo(TilePivot other)
+        {
+            if (other is null)
+            {
+                return 1;
+            }
+
             switch (Family)
             {
                 case FamilyPivot.Dragon:
-                    return $"{Family.ToString().ToLowerInvariant()}_{Dragon.Value.ToString().ToLowerInvariant()}";
+                    if (other.Family == FamilyPivot.Dragon)
+                    {
+                        return Dragon.Value < other.Dragon.Value ? -1 : (Dragon.Value == other.Dragon.Value ? 0 : 1);
+                    }
+                    else
+                    {
+                        return 1;
+                    }
                 case FamilyPivot.Wind:
-                    return $"{Family.ToString().ToLowerInvariant()}_{Wind.Value.ToString().ToLowerInvariant()}";
+                    if (other.Family == FamilyPivot.Wind)
+                    {
+                        return Wind.Value < other.Wind.Value ? -1 : (Wind.Value == other.Wind.Value ? 0 : 1);
+                    }
+                    else if (other.Family == FamilyPivot.Dragon)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
                 default:
-                    return $"{Family.ToString().ToLowerInvariant()}_{Number.ToString()}" + (IsRedDora ? "_red" : string.Empty);
+                    if (other.Family == Family)
+                    {
+                        if (Number < other.Number)
+                        {
+                            return -1;
+                        }
+                        else if (Number > other.Number)
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            if (IsRedDora && !other.IsRedDora)
+                            {
+                                return -1;
+                            }
+                            else if (!IsRedDora && other.IsRedDora)
+                            {
+                                return 1;
+                            }
+                            else
+                            {
+                                return 0;
+                            }
+                        }
+                    }
+                    else if (other.Family < Family)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
             }
         }
 
         /// <summary>
-        /// Checks if the instance is similar to another one.
+        /// Checks the equality between this instance and another one.
+        /// <see cref="IsRedDora"/> value is ignored for this comparison.
         /// </summary>
-        /// <param name="other">The other instance.</param>
-        /// <returns><c>True</c> if similar; <c>False</c> otherwise.</returns>
-        public bool IsSimilarTo(TilePivot other)
+        /// <param name="other">The second instance.</param>
+        /// <returns><c>True</c> if both instances are equal; <c>False</c> otherwise.</returns>
+        public bool Equals(TilePivot other)
         {
-            return other != null
+            return !(other is null)
                 && other.Family == Family
-                && other.Dragon == Dragon
                 && other.Wind == Wind
-                && other.Number == Number
-                && other.IsRedDora == IsRedDora;
+                && other.Dragon == Dragon
+                && other.Number == Number;
+        }
+
+        /// <summary>
+        /// Overriden; provides an hashcode for this instance.
+        /// </summary>
+        /// <returns>Hashcode of this instance.</returns>
+        public override int GetHashCode()
+        {
+            return Tuple.Create(Family, Number, Wind, Dragon).GetHashCode();
+        }
+
+        /// <summary>
+        /// Overriden; checks the equality between this instance and any other object.
+        /// If <paramref name="obj"/> is a <see cref="TilePivot"/>, see <see cref="Equals(TilePivot)"/>.
+        /// </summary>
+        /// <param name="obj">Any <see cref="object"/>.</param>
+        /// <returns><c>True</c> if both instances are equal; <c>False</c> otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as TilePivot);
+        }
+
+        #endregion Interfaces implementation and overrides from base
+
+        /// <summary>
+        /// Checks if the instance has the same ID than another instance.
+        /// </summary>
+        /// <param name="other">The second instance.</param>
+        /// <returns><c>True</c> if instances have the same <see cref="Id"/>; <c>False</c> otherwise.</returns>
+        public bool IdEquals(TilePivot other)
+        {
+            return Id == other?.Id;
         }
     }
 }
