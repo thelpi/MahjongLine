@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using MahjongLineServer.Controllers.Exceptions;
 using MahjongLineServer.Controllers.Requests;
 using MahjongLineServer.Pivot;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +15,22 @@ namespace MahjongLineServer.Controllers
     public class GameController : Controller
     {
         private static readonly List<GamePivot> _games = new List<GamePivot>();
+        private const int MAX_HOST_GAMES = 100;
+
+        /// <summary>
+        /// Collection of <see cref="GamePivot"/> instances.
+        /// </summary>
+        public static IReadOnlyCollection<GamePivot> Games { get { return _games; } }
+
+        /// <summary>
+        /// Gets every games.
+        /// </summary>
+        /// <returns>List of <see cref="GamePivot"/> instances.</returns>
+        [HttpGet]
+        public ActionResult GetGamesList()
+        {
+            return Ok(Games);
+        }
 
         /// <summary>
         /// Creates a new game.
@@ -30,378 +44,102 @@ namespace MahjongLineServer.Controllers
                 return BadRequest();
             }
 
-            var g = new GamePivot(request.InitialPointsRule, request.EndOfGameRule,
+            if (_games.Count >= MAX_HOST_GAMES)
+            {
+                return Forbid();
+            }
+
+            GamePivot game = new GamePivot(request.InitialPointsRule, request.EndOfGameRule,
                 request.WithRedDoras, request.UseNagashiMangan, request.UseRenhou);
-
-            _games.Add(g);
-
-            return Ok(g);
+            _games.Add(game);
+            return Ok(game);
         }
 
         /// <summary>
         /// Adds a player to the game.
         /// </summary>
-        /// <param name="guid">The game GUID.</param>
+        /// <param name="gameId">The game GUID.</param>
         /// <param name="request">Player informations request.</param>
         /// <returns>Instance of game.</returns>
-        [HttpPost("{guid}/players")]
-        public ActionResult AddPlayer([FromRoute] Guid guid, [FromBody] PlayerRequest request)
+        [HttpPost("{gameId}/players")]
+        public ActionResult AddPlayer([FromRoute] Guid gameId, [FromBody] PlayerRequest request)
         {
             if (request == null)
             {
                 return BadRequest();
             }
 
-            GamePivot game = CheckGame(guid);
-
+            GamePivot game = this.CheckGame(gameId);
             game.AddPlayer(request.PlayerName, request.IsCpu);
-
             return Ok(game);
         }
 
         /// <summary>
         /// Gets players rankings.
         /// </summary>
-        /// <param name="guid">The game GUID.</param>
+        /// <param name="gameId">The game GUID.</param>
         /// <returns>Collection of <see cref="PlayerScorePivot"/>.</returns>
-        [HttpGet("{guid}/rankings")]
-        public ActionResult ComputeRankings([FromRoute] Guid guid)
+        [HttpGet("{gameId}/rankings")]
+        public ActionResult ComputeRankings([FromRoute] Guid gameId)
         {
-            return Ok(ScoreTools.ComputeCurrentRanking(CheckGame(guid)));
+            GamePivot game = this.CheckGame(gameId);
+            return Ok(ScoreTools.ComputeCurrentRanking(game));
         }
 
         /// <summary>
         /// Gets current wind for specified player.
         /// </summary>
-        /// <param name="guid">The game GUID.</param>
+        /// <param name="gameId">The game GUID.</param>
         /// <param name="playerIndex">The player index.</param>
         /// <returns>Current <see cref="WindPivot"/>.</returns>
-        [HttpGet("{guid}/players/{playerIndex}/winds")]
-        public ActionResult GetPlayerCurrentWind([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        [HttpGet("{gameId}/players/{playerIndex}/winds")]
+        public ActionResult GetPlayerCurrentWind([FromRoute] Guid gameId, [FromRoute] int playerIndex)
         {
-            return Ok(CheckGame(guid).GetPlayerCurrentWind(CheckPlayerIndex(playerIndex)));
+            GamePivot game = this.CheckGame(gameId);
+            this.CheckPlayerIndex(playerIndex);
+            return Ok(game.GetPlayerCurrentWind(playerIndex));
         }
 
         /// <summary>
         /// Gets a game by its identifier.
         /// </summary>
-        /// <param name="guid">Game identifier.</param>
+        /// <param name="gameId">Game identifier.</param>
         /// <returns>Game instance.</returns>
-        [HttpGet("{guid}")]
-        public ActionResult GetGame([FromRoute] Guid guid)
+        [HttpGet("{gameId}")]
+        public ActionResult GetGame([FromRoute] Guid gameId)
         {
-            return Ok(CheckGame(guid));
+            GamePivot game = this.CheckGame(gameId);
+            return Ok(game);
         }
 
         /// <summary>
         /// Proceeds to next round.
         /// </summary>
-        /// <param name="guid">Game identifier.</param>
+        /// <param name="gameId">Game identifier.</param>
         /// <param name="ronPlayerId">Ron player index; if any.</param>
         /// <returns>Instance of <see cref="EndOfRoundInformationsPivot"/>.</returns>
-        [HttpPatch("{guid}/rounds")]
-        public ActionResult NextRound([FromRoute] Guid guid, [FromQuery] int? ronPlayerId)
+        [HttpPatch("{gameId}/rounds")]
+        public ActionResult NextRound([FromRoute] Guid gameId, [FromQuery] int? ronPlayerId)
         {
-            return Ok(CheckGame(guid).NextRound(CheckPlayerIndex(ronPlayerId)));
-        }
-
-        /// <summary>
-        /// Picks a tile.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>Picked tile.</returns>
-        [HttpPatch("{guid}/calls/pick")]
-        public ActionResult Pick([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.Pick());
-        }
-
-        /// <summary>
-        /// Calls riichi while discarding the specified tile.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="tileId">Tile identifier.</param>
-        /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/calls/riichi")]
-        public ActionResult CallRiichi([FromRoute] Guid guid, [FromQuery] Guid tileId)
-        {
-            RoundPivot round = CheckGame(guid).Round;
-            return Ok(round.CallRiichi(round.GetTileFromIdentifier(tileId)));
-        }
-
-        /// <summary>
-        /// Proceeds to call chii.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="startNumber">Tile number of the first tile of the sequence.</param>
-        /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/calls/chii")]
-        public ActionResult CallChii([FromRoute] Guid guid, [FromQuery] int startNumber)
-        {
-            return Ok(CheckGame(guid).Round.CallChii(startNumber));
-        }
-
-        /// <summary>
-        /// Proceeds to call kan for the specified player.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="playerIndex">Player index.</param>
-        /// <param name="tileId">Optionnal tile identifier.</param>
-        /// <returns>The compensation tile.</returns>
-        [HttpPatch("{guid}/players/{playerIndex}/calls/kan")]
-        public ActionResult CallKan([FromRoute] Guid guid, [FromRoute] int playerIndex, [FromQuery] Guid? tileId)
-        {
-            RoundPivot round = CheckGame(guid).Round;
-            TilePivot tile = tileId.HasValue ? round.GetTileFromIdentifier(tileId.Value, playerIndex) : null;
-            return Ok(round.CallKan(CheckPlayerIndex(playerIndex), tile));
+            GamePivot game = this.CheckGame(gameId);
+            if (ronPlayerId.HasValue)
+            {
+                this.CheckPlayerIndex(ronPlayerId.Value);
+            }
+            return Ok(game.NextRound(ronPlayerId));
         }
 
         /// <summary>
         /// Proceeds to undo a compensation pick.
         /// </summary>
-        /// <param name="guid">Game identifier.</param>
+        /// <param name="gameId">Game identifier.</param>
         /// <returns>No content.</returns>
-        [HttpPatch("{guid}/compensation-pick-undoing")]
-        public ActionResult UndoPickCompensationTile([FromRoute] Guid guid)
+        [HttpPatch("{gameId}/compensation-pick-undoing")]
+        public ActionResult UndoPickCompensationTile([FromRoute] Guid gameId)
         {
-            CheckGame(guid).Round.UndoPickCompensationTile();
+            GamePivot game = this.CheckGame(gameId);
+            game.Round.UndoPickCompensationTile();
             return NoContent();
-        }
-
-        /// <summary>
-        /// Proceeds to call pon for the specified player.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="playerIndex">Player index.</param>
-        /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/players/{playerIndex}/calls/pon")]
-        public ActionResult CallPon([FromRoute] Guid guid, [FromRoute] int playerIndex)
-        {
-            return Ok(CheckGame(guid).Round.CallPon(CheckPlayerIndex(playerIndex)));
-        }
-
-        /// <summary>
-        /// Proceeds to discard.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="tileId">Tile identifier.</param>
-        /// <returns>Success or failure of the operation.</returns>
-        [HttpPatch("{guid}/calls/discard")]
-        public ActionResult Discard([FromRoute] Guid guid, [FromQuery] Guid tileId)
-        {
-            RoundPivot round = CheckGame(guid).Round;
-            return Ok(round.Discard(round.GetTileFromIdentifier(tileId)));
-        }
-
-        /// <summary>
-        /// Checks for tsumo call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="isKanCompensation"><c>1</c> if kan compensation; <c>0</c> otherwise.</param>
-        /// <returns><c>True</c> if can tsumo; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/check-calls/tsumo")]
-        public ActionResult CanCallTsumo([FromRoute] Guid guid, [FromQuery] byte isKanCompensation)
-        {
-            return Ok(CheckGame(guid).Round.CanCallTsumo(isKanCompensation > 0));
-        }
-
-        /// <summary>
-        /// Checks for auto-discard call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns><c>True</c> if can auto-discard.</returns>
-        [HttpGet("{guid}/check-calls/auto-discard")]
-        public ActionResult HumanCanAutoDiscard([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.HumanCanAutoDiscard());
-        }
-
-        /// <summary>
-        /// Checks for chii call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>List of possible chiis, if any.</returns>
-        [HttpGet("{guid}/check-calls/chii")]
-        public ActionResult CanCallChii([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.CanCallChii().ToList());
-        }
-
-        /// <summary>
-        /// Checks for kan call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="playerIndex">Player index.</param>
-        /// <returns>List of possible kans, if any.</returns>
-        [HttpGet("{guid}/players/{playerIndex}/check-calls/kan")]
-        public ActionResult CanCallKan([FromRoute] Guid guid, [FromRoute] int playerIndex)
-        {
-            return Ok(CheckGame(guid).Round.CanCallKan(CheckPlayerIndex(playerIndex)));
-        }
-
-        /// <summary>
-        /// Checks for pon or kan call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="playerIndex">Player index.</param>
-        /// <returns><c>True</c> if kan or pon possible; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/players/{playerIndex}/check-calls/pon-or-kan")]
-        public ActionResult CanCallPonOrKan([FromRoute] Guid guid, [FromRoute] int playerIndex)
-        {
-            return Ok(CheckGame(guid).Round.CanCallPonOrKan(CheckPlayerIndex(playerIndex)));
-        }
-
-        /// <summary>
-        /// Checks for riichi call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>Chii informations.</returns>
-        [HttpGet("{guid}/check-calls/riichi")]
-        public ActionResult CanCallRiichi([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.CanCallRiichi());
-        }
-
-        /// <summary>
-        /// Checks for discard call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="tileId">Tile identifier.</param>
-        /// <returns><c>True</c> if tile can be discarded; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/check-calls/discard")]
-        public ActionResult CanDiscard([FromRoute] Guid guid, [FromQuery] Guid tileId)
-        {
-            RoundPivot round = CheckGame(guid).Round;
-            return Ok(round.CanDiscard(round.GetTileFromIdentifier(tileId)));
-        }
-
-        /// <summary>
-        /// Checks for pon call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="playerIndex">Player index.</param>
-        /// <returns><c>True</c> if pon possible; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/players/{playerIndex}/check-calls/pon")]
-        public ActionResult CanCallPon([FromRoute] Guid guid, [FromRoute] int playerIndex)
-        {
-            return Ok(CheckGame(guid).Round.CanCallPon(CheckPlayerIndex(playerIndex)));
-        }
-
-        /// <summary>
-        /// Checks for ron call.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="playerIndex">Player index.</param>
-        /// <returns><c>True</c> if ron possible; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/players/{playerIndex}/check-calls/ron")]
-        public ActionResult CanCallRon([FromRoute] Guid guid, [FromRoute] int playerIndex)
-        {
-            return Ok(CheckGame(guid).Round.CanCallRon(CheckPlayerIndex(playerIndex)));
-        }
-
-        /// <summary>
-        /// Checks for CPU kan decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="checkConcealedOnly"><c>1</c> if only concealed should be checked; <c>0</c> otherwise.</param>
-        /// <returns>Kan informations, if any.</returns>
-        [HttpGet("{guid}/cpu-check-calls/kan")]
-        public ActionResult KanDecision([FromRoute] Guid guid, [FromQuery] byte checkConcealedOnly)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.KanDecision(checkConcealedOnly > 0));
-        }
-
-        /// <summary>
-        /// Checks for CPU ron decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="ronCalled"><c>1</c> if ron has already been called; <c>0</c> otherwise.</param>
-        /// <returns>List of player index who proceed to call ron.</returns>
-        [HttpGet("{guid}/cpu-check-calls/ron")]
-        public ActionResult RonDecision([FromRoute] Guid guid, [FromQuery] byte ronCalled)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.RonDecision(ronCalled > 0));
-        }
-
-        /// <summary>
-        /// Checks for CPU chii decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>Chii sequence information if any.</returns>
-        [HttpGet("{guid}/cpu-check-calls/chii")]
-        public ActionResult ChiiDecision([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.ChiiDecision());
-        }
-
-        /// <summary>
-        /// Checks for CPU tsumo decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <param name="isKanCompensation"><c>1</c> if kan compensation; <c>0</c> otherwise.</param>
-        /// <returns><c>True</c> if tsumo; <c>False</c> otherwise.</returns>
-        [HttpGet("{guid}/cpu-check-calls/tsumo")]
-        public ActionResult TsumoDecision([FromRoute] Guid guid, [FromQuery] byte isKanCompensation)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.TsumoDecision(isKanCompensation > 0));
-        }
-
-        /// <summary>
-        /// Checks for CPU pon decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>The player index who makes the call if any.</returns>
-        [HttpGet("{guid}/cpu-check-calls/pon")]
-        public ActionResult PonDecision([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.PonDecision());
-        }
-
-        /// <summary>
-        /// Checks for CPU riichi decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>Tile discarded.</returns>
-        [HttpGet("{guid}/cpu-check-calls/riichi")]
-        public ActionResult RiichiDecision([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.RiichiDecision());
-        }
-
-        /// <summary>
-        /// Checks for CPU discard decision.
-        /// </summary>
-        /// <param name="guid">Game identifier.</param>
-        /// <returns>Tile discarded.</returns>
-        [HttpGet("{guid}/cpu-check-calls/discard")]
-        public ActionResult DiscardDecision([FromRoute] Guid guid)
-        {
-            return Ok(CheckGame(guid).Round.IaManager.DiscardDecision());
-        }
-
-        private static int? CheckPlayerIndex(int? playerIndex)
-        {
-            if (playerIndex.HasValue && (playerIndex < 0 || playerIndex > 3))
-            {
-                throw new InvalidPlayerIndexException(playerIndex.Value);
-            }
-            return playerIndex;
-        }
-
-        private static int CheckPlayerIndex(int playerIndex)
-        {
-            return CheckPlayerIndex((int?)playerIndex).Value;
-        }
-
-        private static GamePivot CheckGame(Guid guid)
-        {
-            GamePivot game = _games.FirstOrDefault(g => g.Id == guid);
-            if (game == null)
-            {
-                throw new InvalidGameIdentifierException(guid);
-            }
-
-            return game;
         }
     }
 }
