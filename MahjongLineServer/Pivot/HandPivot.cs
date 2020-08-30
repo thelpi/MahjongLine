@@ -85,7 +85,7 @@ namespace MahjongLineServer.Pivot
             get
             {
                 List<TilePivot> allTiles = _declaredCombinations.SelectMany(t => t.Tiles).Concat(_concealedTiles).ToList();
-                if (LatestPick != null && !allTiles.Any(t => ReferenceEquals(t, LatestPick)))
+                if (LatestPick != null && !allTiles.Any(t => t.IdEquals(LatestPick)))
                 {
                     allTiles.Add(LatestPick);
                 }
@@ -646,7 +646,7 @@ namespace MahjongLineServer.Pivot
                 {
                     tile
                 };
-                concealedTiles.AddRange(fromOpenPon.Tiles.Where(t => !ReferenceEquals(t, fromOpenPon.OpenTile)));
+                concealedTiles.AddRange(fromOpenPon.Tiles.Where(t => !t.IdEquals(fromOpenPon.OpenTile)));
 
                 _declaredCombinations[indexOfPon] = new TileComboPivot(concealedTiles, fromOpenPon.OpenTile, fromOpenPon.StolenFrom);
                 _concealedTiles.Remove(tile);
@@ -817,7 +817,7 @@ namespace MahjongLineServer.Pivot
             }
 
             // The combination with the last pick.
-            TileComboPivot combo = YakusCombinations.FirstOrDefault(c => c.Tiles.Any(t => ReferenceEquals(t, LatestPick)));
+            TileComboPivot combo = YakusCombinations.FirstOrDefault(c => c.Tiles.Any(t => t.IdEquals(LatestPick)));
 
             if (combo == null || combo.IsBrelanOrSquare)
             {

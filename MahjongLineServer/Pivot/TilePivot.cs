@@ -14,28 +14,32 @@ namespace MahjongLineServer.Pivot
         #region Embedded properties
 
         /// <summary>
+        /// Tile unique identifier.
+        /// </summary>
+        public Guid Id { get; }
+        /// <summary>
         /// Family.
         /// </summary>
-        public FamilyPivot Family { get; private set; }
+        public FamilyPivot Family { get; }
         /// <summary>
         /// Number, between <c>1</c> and <c>9</c>.
         /// <c>0</c> for <see cref="FamilyPivot.Wind"/> and <see cref="FamilyPivot.Dragon"/>.
         /// </summary>
-        public byte Number { get; private set; }
+        public byte Number { get; }
         /// <summary>
         /// Wind.
         /// <c>Null</c> if not <see cref="FamilyPivot.Wind"/>.
         /// </summary>
-        public WindPivot? Wind { get; private set; }
+        public WindPivot? Wind { get; }
         /// <summary>
         /// Dragon.
         /// <c>Null</c> if not <see cref="FamilyPivot.Dragon"/>.
         /// </summary>
-        public DragonPivot? Dragon { get; private set; }
+        public DragonPivot? Dragon { get; }
         /// <summary>
         /// Indicates if the instance is a red dora.
         /// </summary>
-        public bool IsRedDora { get; private set; }
+        public bool IsRedDora { get; }
 
         #endregion Embedded properties
 
@@ -77,25 +81,28 @@ namespace MahjongLineServer.Pivot
         #region Constructors
 
         // Constructor for non-honor families.
-        private TilePivot(FamilyPivot family, byte number, bool isRedDora = false)
+        private TilePivot(FamilyPivot family, byte number, bool isRedDora = false): this(family)
         {
-            Family = family;
             Number = number;
             IsRedDora = isRedDora;
         }
 
         // Constructor for wind.
-        private TilePivot(WindPivot wind)
+        private TilePivot(WindPivot wind) : this(FamilyPivot.Wind)
         {
-            Family = FamilyPivot.Wind;
             Wind = wind;
         }
 
         // Constructor for dragon.
-        private TilePivot(DragonPivot dragon)
+        private TilePivot(DragonPivot dragon) : this(FamilyPivot.Dragon)
         {
-            Family = FamilyPivot.Dragon;
             Dragon = dragon;
+        }
+        
+        private TilePivot(FamilyPivot family)
+        {
+            Family = family;
+            Id = Guid.NewGuid();
         }
 
         #endregion Constructors
@@ -412,6 +419,16 @@ namespace MahjongLineServer.Pivot
             return combo != null && combo.IsSequence && combo.Tiles.Contains(this)
                 && combo.SequenceFirstNumber != Number
                 && combo.SequenceLastNumber != Number;
+        }
+
+        /// <summary>
+        /// Checks if the instance has the same ID than another instance.
+        /// </summary>
+        /// <param name="other">The second instance.</param>
+        /// <returns><c>True</c> if instances have the same <see cref="Id"/>; <c>False</c> otherwise.</returns>
+        public bool IdEquals(TilePivot other)
+        {
+            return Id == other?.Id;
         }
 
         #endregion Public methods

@@ -822,7 +822,7 @@ namespace MahjongLineServer.Pivot
         /// <returns><c>True</c> if the tile is discardable; <c>False</c> otherwise.</returns>
         public bool CanDiscard(TilePivot tile)
         {
-            if (!_waitForDiscard || (IsRiichi(CurrentPlayerIndex) && !ReferenceEquals(tile, _hands[CurrentPlayerIndex].LatestPick)))
+            if (!_waitForDiscard || (IsRiichi(CurrentPlayerIndex) && !tile.IdEquals(_hands[CurrentPlayerIndex].LatestPick)))
             {
                 return false;
             }
@@ -908,7 +908,7 @@ namespace MahjongLineServer.Pivot
                 }
             }
 
-            return fullList.Where(t => !ReferenceEquals(t, exceptTile)).ToList();
+            return fullList.Where(t => !exceptTile.IdEquals(t)).ToList();
         }
 
         // Picks a compensation tile (after a kan call) for the current player.
@@ -974,7 +974,7 @@ namespace MahjongLineServer.Pivot
         {
             return IsRiichi(playerIndex)
                 && _discards[playerIndex].Count > 0
-                && ReferenceEquals(_discards[playerIndex].Last(), _riichis[playerIndex].Tile)
+                && _discards[playerIndex].Last().IdEquals(_riichis[playerIndex].Tile)
                 && IsUninterruptedHistory(playerIndex);
         }
 
