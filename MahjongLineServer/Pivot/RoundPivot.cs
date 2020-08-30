@@ -860,29 +860,27 @@ namespace MahjongLineServer.Pivot
         }
 
         /// <summary>
-        /// Gets the tile at the specified index in the hand of the current player.
+        /// Gets a tile by its identifier in concealed tiles of the specified player (or current player).
         /// </summary>
-        /// <param name="tileIndexInPlayerHand">Tile index.</param>
-        /// <param name="playerIndex">Optionnal; player index if not current player.</param>
+        /// <param name="tileId">The tile identifier.</param>
+        /// <param name="playerIndex">Optionnal; the player index.</param>
         /// <returns>The tile.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="playerIndex"/> is out of range.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="tileIndexInPlayerHand"/> is out of range.</exception>
-        public TilePivot GetTileFromIndex(int tileIndexInPlayerHand, int? playerIndex = null)
+        /// <exception cref="ArgumentException"><paramref name="tileId"/> not found.</exception>
+        public TilePivot GetTileFromIdentifier(Guid tileId, int? playerIndex = null)
         {
             if (playerIndex.HasValue && (playerIndex.Value < 0 || playerIndex.Value > 3))
             {
                 throw new ArgumentOutOfRangeException(nameof(playerIndex));
             }
 
-            int actualPlayerIndex = playerIndex ?? CurrentPlayerIndex;
-
-            IReadOnlyCollection<TilePivot> tiles = GetHand(actualPlayerIndex).ConcealedTiles;
-            if (tileIndexInPlayerHand < 0 || tileIndexInPlayerHand >= tiles.Count)
+            TilePivot tile = GetHand(playerIndex ?? CurrentPlayerIndex).ConcealedTiles.FirstOrDefault(t => t.Id == tileId);
+            if (tile == null)
             {
-                throw new ArgumentOutOfRangeException(nameof(tileIndexInPlayerHand));
+                throw new ArgumentException(nameof(tileId));
             }
 
-            return tiles.ElementAt(tileIndexInPlayerHand);
+            return tile;
         }
 
         #endregion Public methods

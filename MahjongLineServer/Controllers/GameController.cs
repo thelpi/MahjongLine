@@ -120,14 +120,13 @@ namespace MahjongLineServer.Controllers
         /// Calls riichi while discarding the specified tile.
         /// </summary>
         /// <param name="guid">Game identifier.</param>
-        /// <param name="tileIndexInPlayerHand">Tile index in player hand.</param>
+        /// <param name="tileId">Tile identifier.</param>
         /// <returns>Success or failure of the operation.</returns>
         [HttpPatch("{guid}/calls/riichi")]
-        public ActionResult CallRiichi([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
+        public ActionResult CallRiichi([FromRoute] Guid guid, [FromQuery] Guid tileId)
         {
             RoundPivot round = CheckGame(guid).Round;
-            TilePivot tile = round.GetTileFromIndex(tileIndexInPlayerHand);
-            return Ok(round.CallRiichi(tile));
+            return Ok(round.CallRiichi(round.GetTileFromIdentifier(tileId)));
         }
 
         /// <summary>
@@ -147,13 +146,13 @@ namespace MahjongLineServer.Controllers
         /// </summary>
         /// <param name="guid">Game identifier.</param>
         /// <param name="playerIndex">Player index.</param>
-        /// <param name="tileIndexInPlayerHand">Optionnal tile index.</param>
+        /// <param name="tileId">Optionnal tile identifier.</param>
         /// <returns>The compensation tile.</returns>
         [HttpPatch("{guid}/players/{playerIndex}/calls/kan")]
-        public ActionResult CallKan([FromRoute] Guid guid, [FromRoute] int playerIndex, [FromQuery] int? tileIndexInPlayerHand)
+        public ActionResult CallKan([FromRoute] Guid guid, [FromRoute] int playerIndex, [FromQuery] Guid? tileId)
         {
             RoundPivot round = CheckGame(guid).Round;
-            TilePivot tile = tileIndexInPlayerHand.HasValue ? round.GetTileFromIndex(tileIndexInPlayerHand.Value, playerIndex) : null;
+            TilePivot tile = tileId.HasValue ? round.GetTileFromIdentifier(tileId.Value, playerIndex) : null;
             return Ok(round.CallKan(CheckPlayerIndex(playerIndex), tile));
         }
 
@@ -185,14 +184,13 @@ namespace MahjongLineServer.Controllers
         /// Proceeds to discard.
         /// </summary>
         /// <param name="guid">Game identifier.</param>
-        /// <param name="tileIndexInPlayerHand">Tile index in the current player hand.</param>
+        /// <param name="tileId">Tile identifier.</param>
         /// <returns>Success or failure of the operation.</returns>
         [HttpPatch("{guid}/calls/discard")]
-        public ActionResult Discard([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
+        public ActionResult Discard([FromRoute] Guid guid, [FromQuery] Guid tileId)
         {
             RoundPivot round = CheckGame(guid).Round;
-            TilePivot tile = round.GetTileFromIndex(tileIndexInPlayerHand);
-            return Ok(round.Discard(tile));
+            return Ok(round.Discard(round.GetTileFromIdentifier(tileId)));
         }
 
         /// <summary>
@@ -268,14 +266,13 @@ namespace MahjongLineServer.Controllers
         /// Checks for discard call.
         /// </summary>
         /// <param name="guid">Game identifier.</param>
-        /// <param name="tileIndexInPlayerHand">Tiles index in player hand.</param>
+        /// <param name="tileId">Tile identifier.</param>
         /// <returns><c>True</c> if tile can be discarded; <c>False</c> otherwise.</returns>
         [HttpGet("{guid}/check-calls/discard")]
-        public ActionResult CanDiscard([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
+        public ActionResult CanDiscard([FromRoute] Guid guid, [FromQuery] Guid tileId)
         {
             RoundPivot round = CheckGame(guid).Round;
-            TilePivot tile = round.GetTileFromIndex(tileIndexInPlayerHand);
-            return Ok(round.CanDiscard(tile));
+            return Ok(round.CanDiscard(round.GetTileFromIdentifier(tileId)));
         }
 
         /// <summary>

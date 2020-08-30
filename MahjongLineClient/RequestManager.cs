@@ -73,9 +73,9 @@ namespace MahjongLineClient
             return SendQuery<List<TilePivot>>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/riichi");
         }
 
-        public bool CanDiscard(int tileIndexInPlayerHand)
+        public bool CanDiscard(TilePivot tile)
         {
-            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}");
+            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/discard?tileId={tile.Id}");
         }
 
         public bool CanCallPon(int playerIndex)
@@ -166,9 +166,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public bool CallRiichi(int tileIndexInPlayerHand)
+        public bool CallRiichi(TilePivot tile)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/riichi?tileIndexInPlayerHand={tileIndexInPlayerHand}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/riichi?tileId={tile.Id}");
             RefreshGame();
             return result;
         }
@@ -180,9 +180,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public TilePivot CallKan(int playerIndex, int? tileIndexInPlayerHand = null)
+        public TilePivot CallKan(int playerIndex, TilePivot tile = null)
         {
-            TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/kan?tileIndexInPlayerHand={tileIndexInPlayerHand}");
+            TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/kan?tileId={tile?.Id}");
             RefreshGame();
             NotifyWallCount?.Invoke(result, null);
             return result;
@@ -201,9 +201,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public bool Discard(int tileIndexInPlayerHand)
+        public bool Discard(TilePivot tile)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/discard?tileId={tile.Id}");
             RefreshGame();
             return result;
         }

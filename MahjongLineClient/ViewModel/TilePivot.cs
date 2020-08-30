@@ -12,7 +12,7 @@ namespace MahjongLineClient
         /// <summary>
         /// Tile unique identifier.
         /// </summary>
-        public Guid Id { get; }
+        public Guid Id { get; set; }
         /// <summary>
         /// Family.
         /// </summary>
@@ -50,6 +50,23 @@ namespace MahjongLineClient
         public bool IsHonorOrTerminal { get; set; }
 
         #region Interfaces implementation and overrides from base
+
+        /// <summary>
+        /// Overriden; provides a textual representation of the instance.
+        /// </summary>
+        /// <returns>Textual representation of the instance.</returns>
+        public override string ToString()
+        {
+            switch (Family)
+            {
+                case FamilyPivot.Dragon:
+                    return $"{Family.ToString().ToLowerInvariant()}_{Dragon.Value.ToString().ToLowerInvariant()}";
+                case FamilyPivot.Wind:
+                    return $"{Family.ToString().ToLowerInvariant()}_{Wind.Value.ToString().ToLowerInvariant()}";
+                default:
+                    return $"{Family.ToString().ToLowerInvariant()}_{Number.ToString()}" + (IsRedDora ? "_red" : string.Empty);
+            }
+        }
 
         /// <summary>
         /// Overriden; checks equality between an instance of <see cref="TilePivot"/> and any object.

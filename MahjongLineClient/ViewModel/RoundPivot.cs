@@ -140,17 +140,5 @@ namespace MahjongLineClient
 
             return Riichis.ElementAt(playerIndex) != null && Riichis.ElementAt(playerIndex).DiscardRank == rank;
         }
-
-        /// <summary>
-        /// Gets the index of a tile in the concealed tiles of the current player.
-        /// </summary>
-        /// <param name="tile">The tile to find.</param>
-        /// <param name="playerIndex">Optionnal; the player index if not the current one.</param>
-        /// <returns>The tile index.</returns>
-        public int GetTileIndex(TilePivot tile, int? playerIndex = null)
-        {
-            int realPlayerIndex = playerIndex ?? CurrentPlayerIndex;
-            return GetHand(realPlayerIndex).ConcealedTiles.ToList().FindIndex(t => tile.IsSimilarTo(t));
-        }
     }
 }

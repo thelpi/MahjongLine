@@ -55,8 +55,8 @@ namespace MahjongLineClient
             List<Tuple<TilePivot, bool, bool>> r = new List<Tuple<TilePivot, bool, bool>>();
 
             r.AddRange(AllTiles.Select(t => new Tuple<TilePivot, bool, bool>(t,
-                DeclaredCombinations.Any(c => ReferenceEquals(c.OpenTile, t)),
-                ReferenceEquals(LatestPick, t))));
+                DeclaredCombinations.Any(c => c.OpenTile.IdEquals(t)),
+                LatestPick.IdEquals(t))));
 
             return r.OrderBy(tuple => tuple.Item3).ToList();
         }

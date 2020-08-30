@@ -542,7 +542,7 @@ namespace MahjongLineClient
         // Discard action (human or CPU).
         private void Discard(TilePivot tile)
         {
-            if (_requestManager.Discard(_game.Round.GetTileIndex(tile)))
+            if (_requestManager.Discard(tile))
             {
                 if (!_game.Round.PreviousIsHumanPlayer)
                 {
@@ -652,7 +652,7 @@ namespace MahjongLineClient
         // Riichi call action (human or CPU).
         private void CallRiichi(TilePivot tile)
         {
-            if (_requestManager.CallRiichi(_game.Round.GetTileIndex(tile)))
+            if (_requestManager.CallRiichi(tile))
             {
                 if (!_game.Round.PreviousIsHumanPlayer)
                 {
@@ -677,7 +677,7 @@ namespace MahjongLineClient
         // Proceeds to call a kan for an opponent.
         private TilePivot OpponentBeginCallKan(int playerId, TilePivot kanTilePick, bool concealedKan, bool fromPreviousKan)
         {
-            TilePivot compensationTile = _requestManager.CallKan(playerId, concealedKan ? _game.Round.GetTileIndex(kanTilePick, playerId) : (int?)null);
+            TilePivot compensationTile = _requestManager.CallKan(playerId, concealedKan ? kanTilePick : null);
             if (compensationTile != null)
             {
                 InvokeOverlay("Kan", playerId);
@@ -726,7 +726,7 @@ namespace MahjongLineClient
         // Inner process kan call.
         private void HumanKanCallProcess(TilePivot tile, int? previousPlayerIndex)
         {
-            TilePivot compensationTile = _requestManager.CallKan(GamePivot.HUMAN_INDEX, _game.Round.GetTileIndex(tile, GamePivot.HUMAN_INDEX));
+            TilePivot compensationTile = _requestManager.CallKan(GamePivot.HUMAN_INDEX, tile);
             InvokeOverlay("Kan", GamePivot.HUMAN_INDEX);
             if (CheckOpponensRonCall(false))
             {
@@ -799,7 +799,7 @@ namespace MahjongLineClient
             return this.FindPanel("StpHandP", GamePivot.HUMAN_INDEX)
                 .Children
                 .OfType<Button>()
-                .First(b => _requestManager.CanDiscard(_game.Round.GetTileIndex(b.Tag as TilePivot)));
+                .First(b => _requestManager.CanDiscard(b.Tag as TilePivot));
         }
 
         // Displays the call overlay.
@@ -876,18 +876,12 @@ namespace MahjongLineClient
             this.FindPanel("StpPickP", pIndex).Children.Clear();
 
             panel.Children.Clear();
-            bool alreadyFlaggedTileAsPick = false;
             foreach (TilePivot tile in _game.Round.GetHand(pIndex).ConcealedTiles)
             {
-                bool currentTileIsSameAsPick = pickTile != null && tile.IsSimilarTo(pickTile);
-                if (!currentTileIsSameAsPick || alreadyFlaggedTileAsPick)
+                if (pickTile == null || !pickTile.IdEquals(tile))
                 {
                     panel.Children.Add(tile.GenerateTileButton(isHuman && !_game.Round.IsRiichi(pIndex) ?
                         BtnDiscard_Click : (RoutedEventHandler)null, (AnglePivot)pIndex, !isHuman && !Properties.Settings.Default.DebugMode));
-                }
-                if (currentTileIsSameAsPick && !alreadyFlaggedTileAsPick)
-                {
-                    alreadyFlaggedTileAsPick = true;
                 }
             }
 
