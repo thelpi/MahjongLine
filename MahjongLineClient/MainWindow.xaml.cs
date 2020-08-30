@@ -793,7 +793,7 @@ namespace MahjongLineClient
             return this.FindPanel("StpHandP", GamePivot.HUMAN_INDEX)
                 .Children
                 .OfType<Button>()
-                .First(b => _requestManager.CanDiscard(b.Tag as TilePivot));
+                .First(b => _requestManager.CanDiscard(_game.Round.GetTileIndex(b.Tag as TilePivot)));
         }
 
         // Displays the call overlay.

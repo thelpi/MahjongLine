@@ -70,9 +70,9 @@ namespace MahjongLineClient
             return SendQuery<List<TilePivot>>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/riichi");
         }
 
-        public bool CanDiscard(TilePivot tile)
+        public bool CanDiscard(int tileIndexInPlayerHand)
         {
-            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/discard?family={tile.Family}&wind={tile.Wind}&dragon={tile.Dragon}&number={tile.Number}");
+            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}");
         }
 
         public bool CanCallPon(int playerIndex)

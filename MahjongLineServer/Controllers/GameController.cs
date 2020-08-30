@@ -195,6 +195,193 @@ namespace MahjongLineServer.Controllers
             return Ok(round.Discard(tile));
         }
 
+        /// <summary>
+        /// Checks for tsumo call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="isKanCompensation"><c>1</c> if kan compensation; <c>0</c> otherwise.</param>
+        /// <returns><c>True</c> if can tsumo; <c>False</c> otherwise.</returns>
+        [HttpGet("{guid}/check-calls/tsumo?isKanCompensation={isKanCompensation}")]
+        public ActionResult CanCallTsumo([FromRoute] Guid guid, [FromQuery] byte isKanCompensation)
+        {
+            return Ok(CheckGame(guid).Round.CanCallTsumo(isKanCompensation > 0));
+        }
+
+        /// <summary>
+        /// Checks for auto-discard call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns><c>True</c> if can auto-discard.</returns>
+        [HttpGet("{guid}/check-calls/auto-discard")]
+        public ActionResult HumanCanAutoDiscard([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.HumanCanAutoDiscard());
+        }
+
+        /// <summary>
+        /// Checks for chii call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>List of possible chiis, if any.</returns>
+        [HttpGet("{guid}/check-calls/chii")]
+        public ActionResult CanCallChii([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.CanCallChii());
+        }
+
+        /// <summary>
+        /// Checks for kan call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns>List of possible kans, if any.</returns>
+        [HttpGet("{guid}/players/{playerIndex}/check-calls/kan")]
+        public ActionResult CanCallKan([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        {
+            return Ok(CheckGame(guid).Round.CanCallKan(CheckPlayerIndex(playerIndex)));
+        }
+
+        /// <summary>
+        /// Checks for pon or kan call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns><c>True</c> if kan or pon possible; <c>False</c> otherwise.</returns>
+        [HttpGet("{guid}/players/{playerIndex}/check-calls/pon-or-kan")]
+        public ActionResult CanCallPonOrKan([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        {
+            return Ok(CheckGame(guid).Round.CanCallPonOrKan(CheckPlayerIndex(playerIndex)));
+        }
+
+        /// <summary>
+        /// Checks for riichi call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>Chii informations.</returns>
+        [HttpGet("{guid}/check-calls/riichi")]
+        public ActionResult CanCallRiichi([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.CanCallChii());
+        }
+
+        /// <summary>
+        /// Checks for discard call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="tileIndexInPlayerHand">Tiles index in player hand.</param>
+        /// <returns><c>True</c> if tile can be discarded; <c>False</c> otherwise.</returns>
+        [HttpGet("{guid}/check-calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        public ActionResult CanDiscard([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
+        {
+            RoundPivot round = CheckGame(guid).Round;
+            TilePivot tile = round.GetTileFromIndex(tileIndexInPlayerHand);
+            return Ok(round.CanDiscard(tile));
+        }
+
+        /// <summary>
+        /// Checks for pon call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns><c>True</c> if pon possible; <c>False</c> otherwise.</returns>
+        [HttpGet("{guid}/players/{playerIndex}/check-calls/pon")]
+        public ActionResult CanCallPon([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        {
+            return Ok(CheckGame(guid).Round.CanCallPon(CheckPlayerIndex(playerIndex)));
+        }
+
+        /// <summary>
+        /// Checks for ron call.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns><c>True</c> if ron possible; <c>False</c> otherwise.</returns>
+        [HttpGet("{guid}/players/{playerIndex}/check-calls/ron")]
+        public ActionResult CanCallRon([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        {
+            return Ok(CheckGame(guid).Round.CanCallRon(CheckPlayerIndex(playerIndex)));
+        }
+
+        /// <summary>
+        /// Checks for CPU kan decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="checkConcealedOnly"><c>1</c> if only concealed should be checked; <c>0</c> otherwise.</param>
+        /// <returns>Kan informations, if any.</returns>
+        [HttpGet("{guid}/cpu-check-calls/kan?checkConcealedOnly={checkConcealedOnly}")]
+        public ActionResult KanDecision([FromRoute] Guid guid, [FromQuery] byte checkConcealedOnly)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.KanDecision(checkConcealedOnly > 0));
+        }
+
+        /// <summary>
+        /// Checks for CPU ron decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="ronCalled"><c>1</c> if ron has already been called; <c>0</c> otherwise.</param>
+        /// <returns>List of player index who proceed to call ron.</returns>
+        [HttpGet("{guid}/cpu-check-calls/ron?ronCalled={ronCalled}")]
+        public ActionResult RonDecision([FromRoute] Guid guid, [FromQuery] byte ronCalled)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.RonDecision(ronCalled > 0));
+        }
+
+        /// <summary>
+        /// Checks for CPU chii decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>Chii sequence information if any.</returns>
+        [HttpGet("{guid}/cpu-check-calls/chii")]
+        public ActionResult ChiiDecision([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.ChiiDecision());
+        }
+
+        /// <summary>
+        /// Checks for CPU tsumo decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="isKanCompensation"><c>1</c> if kan compensation; <c>0</c> otherwise.</param>
+        /// <returns><c>True</c> if tsumo; <c>False</c> otherwise.</returns>
+        [HttpGet("{guid}/cpu-check-calls/tsumo?isKanCompensation={isKanCompensation}")]
+        public ActionResult TsumoDecision([FromRoute] Guid guid, [FromQuery] byte isKanCompensation)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.TsumoDecision(isKanCompensation > 0));
+        }
+
+        /// <summary>
+        /// Checks for CPU pon decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>The player index who makes the call if any.</returns>
+        [HttpGet("{guid}/cpu-check-calls/pon")]
+        public ActionResult PonDecision([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.PonDecision());
+        }
+
+        /// <summary>
+        /// Checks for CPU riichi decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>Tile discarded.</returns>
+        [HttpGet("{guid}/cpu-check-calls/riichi")]
+        public ActionResult RiichiDecision([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.RiichiDecision());
+        }
+
+        /// <summary>
+        /// Checks for CPU discard decision.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>Tile discarded.</returns>
+        [HttpGet("{guid}/cpu-check-calls/discard")]
+        public ActionResult DiscardDecision([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.IaManager.DiscardDecision());
+        }
+
         private static int? CheckPlayerIndex(int? playerIndex)
         {
             if (playerIndex.HasValue && (playerIndex < 0 || playerIndex > 3))
