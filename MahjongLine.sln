@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MahjongLineServer", "MahjongLineServer\MahjongLineServer.csproj", "{6524F843-6A80-421D-93A6-671218B9C6A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MahjongLineServer", "MahjongLineServer\MahjongLineServer.csproj", "{6524F843-6A80-421D-93A6-671218B9C6A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MahjongLineClient", "MahjongLineClient\MahjongLineClient.csproj", "{C424D2F6-096D-47C3-9368-98E52C495C66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MahjongLineClientUnitTests", "MahjongLineClientUnitTests\MahjongLineClientUnitTests.csproj", "{1559ADCF-5A76-4BA3-83D4-B3B7595722DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{C424D2F6-096D-47C3-9368-98E52C495C66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C424D2F6-096D-47C3-9368-98E52C495C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C424D2F6-096D-47C3-9368-98E52C495C66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1559ADCF-5A76-4BA3-83D4-B3B7595722DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1559ADCF-5A76-4BA3-83D4-B3B7595722DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1559ADCF-5A76-4BA3-83D4-B3B7595722DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1559ADCF-5A76-4BA3-83D4-B3B7595722DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
