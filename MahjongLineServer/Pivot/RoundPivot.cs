@@ -869,7 +869,7 @@ namespace MahjongLineServer.Pivot
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="tileIndexInPlayerHand"/> is out of range.</exception>
         public TilePivot GetTileFromIndex(int tileIndexInPlayerHand, int? playerIndex = null)
         {
-            if (playerIndex.HasValue && playerIndex.Value < 0 || playerIndex.Value > 3)
+            if (playerIndex.HasValue && (playerIndex.Value < 0 || playerIndex.Value > 3))
             {
                 throw new ArgumentOutOfRangeException(nameof(playerIndex));
             }

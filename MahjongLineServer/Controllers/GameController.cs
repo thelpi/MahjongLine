@@ -261,7 +261,7 @@ namespace MahjongLineServer.Controllers
         [HttpGet("{guid}/check-calls/riichi")]
         public ActionResult CanCallRiichi([FromRoute] Guid guid)
         {
-            return Ok(CheckGame(guid).Round.CanCallChii());
+            return Ok(CheckGame(guid).Round.CanCallRiichi());
         }
 
         /// <summary>

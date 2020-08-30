@@ -57,5 +57,20 @@
                     return $"{Family.ToString().ToLowerInvariant()}_{Number.ToString()}" + (IsRedDora ? "_red" : string.Empty);
             }
         }
+
+        /// <summary>
+        /// Checks if the instance is similar to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if similar; <c>False</c> otherwise.</returns>
+        public bool IsSimilarTo(TilePivot other)
+        {
+            return other != null
+                && other.Family == Family
+                && other.Dragon == Dragon
+                && other.Wind == Wind
+                && other.Number == Number
+                && other.IsRedDora == IsRedDora;
+        }
     }
 }

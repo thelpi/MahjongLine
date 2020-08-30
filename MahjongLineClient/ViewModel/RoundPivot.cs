@@ -150,7 +150,7 @@ namespace MahjongLineClient
         public int GetTileIndex(TilePivot tile, int? playerIndex = null)
         {
             int realPlayerIndex = playerIndex ?? CurrentPlayerIndex;
-            return GetHand(realPlayerIndex).ConcealedTiles.ToList().FindIndex(t => ReferenceEquals(t, tile));
+            return GetHand(realPlayerIndex).ConcealedTiles.ToList().FindIndex(t => tile.IsSimilarTo(t));
         }
     }
 }
