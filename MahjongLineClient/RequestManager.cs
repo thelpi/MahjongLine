@@ -41,19 +41,19 @@ namespace MahjongLineClient
             return SendQuery<WindPivot>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/winds");
         }
 
-        public bool CanCallTsumo(bool isKanCompensation)
+        public bool CanCallTsumo(int playerIndex, bool isKanCompensation)
         {
-            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/tsumo?isKanCompensation={(isKanCompensation ? 1 : 0)}");
+            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/check-calls/tsumo?isKanCompensation={(isKanCompensation ? 1 : 0)}");
         }
 
-        public bool HumanCanAutoDiscard()
+        public bool HumanCanAutoDiscard(int playerIndex)
         {
-            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/auto-discard");
+            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/check-calls/auto-discard");
         }
 
-        public Dictionary<TilePivot, bool> CanCallChii()
+        public Dictionary<TilePivot, bool> CanCallChii(int playerIndex)
         {
-            var datas = SendQuery<List<KeyValuePair<TilePivot, bool>>>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/chii");
+            var datas = SendQuery<List<KeyValuePair<TilePivot, bool>>>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/check-calls/chii");
 
             return datas.ToDictionary(d => d.Key, d => d.Value);
         }
@@ -68,14 +68,14 @@ namespace MahjongLineClient
             return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/check-calls/pon-or-kan");
         }
 
-        public List<TilePivot> CanCallRiichi()
+        public List<TilePivot> CanCallRiichi(int playerIndex)
         {
-            return SendQuery<List<TilePivot>>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/riichi");
+            return SendQuery<List<TilePivot>>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/check-calls/riichi");
         }
 
-        public bool CanDiscard(TilePivot tile)
+        public bool CanDiscard(int playerIndex, TilePivot tile)
         {
-            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/discard?tileId={tile.Id}");
+            return SendQuery<bool>(HttpMethod.Get, $"games/{_gameId.ToString()}/players/{playerIndex}/check-calls/discard?tileId={tile.Id}");
         }
 
         public bool CanCallPon(int playerIndex)
@@ -158,24 +158,30 @@ namespace MahjongLineClient
             return result;
         }
 
-        public TilePivot Pick()
+        public void UndoPickCompensationTile()
         {
-            TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/calls/pick");
+            SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/compensation-pick-undoing");
+            RefreshGame();
+        }
+
+        public TilePivot Pick(int playerIndex)
+        {
+            TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/pick");
             RefreshGame();
             NotifyWallCount?.Invoke(result, null);
             return result;
         }
 
-        public bool CallRiichi(TilePivot tile)
+        public bool CallRiichi(int playerIndex, TilePivot tile)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/riichi?tileId={tile.Id}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/riichi?tileId={tile.Id}");
             RefreshGame();
             return result;
         }
 
-        public bool CallChii(int startNumber)
+        public bool CallChii(int playerIndex, int startNumber)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/chii?startNumber={startNumber}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/chii?startNumber={startNumber}");
             RefreshGame();
             return result;
         }
@@ -188,12 +194,6 @@ namespace MahjongLineClient
             return result;
         }
 
-        public void UndoPickCompensationTile()
-        {
-            SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/compensation-pick-undoing");
-            RefreshGame();
-        }
-
         public bool CallPon(int playerIndex)
         {
             bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/pon");
@@ -201,9 +201,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public bool Discard(TilePivot tile)
+        public bool Discard(int playerIndex, TilePivot tile)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/discard?tileId={tile.Id}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/discard?tileId={tile.Id}");
             RefreshGame();
             return result;
         }

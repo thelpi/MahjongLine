@@ -119,7 +119,7 @@ namespace MahjongLineClient
         {
             if (IsCurrentlyClickable(e))
             {
-                Dictionary<TilePivot, bool> tileChoices = _requestManager.CanCallChii();
+                Dictionary<TilePivot, bool> tileChoices = _requestManager.CanCallChii(GamePivot.HUMAN_INDEX);
 
                 if (tileChoices.Keys.Count > 0)
                 {
@@ -343,7 +343,7 @@ namespace MahjongLineClient
                             continue;
                         }
 
-                        if (!skipCurrentAction && _game.Round.IsHumanPlayer && _requestManager.CanCallChii().Count > 0)
+                        if (!skipCurrentAction && _game.Round.IsHumanPlayer && _requestManager.CanCallChii(GamePivot.HUMAN_INDEX).Count > 0)
                         {
                             break;
                         }
@@ -452,7 +452,7 @@ namespace MahjongLineClient
         {
             Pick();
 
-            if (_requestManager.CanCallTsumo(false))
+            if (_requestManager.CanCallTsumo(GamePivot.HUMAN_INDEX, false))
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -462,7 +462,7 @@ namespace MahjongLineClient
                 return Properties.Settings.Default.AutoCallMahjong ? new PanelButton("BtnTsumo", -1) : null;
             }
 
-            _riichiTiles = _requestManager.CanCallRiichi();
+            _riichiTiles = _requestManager.CanCallRiichi(GamePivot.HUMAN_INDEX);
             if (_riichiTiles.Count > 0)
             {
                 Dispatcher.Invoke(() =>
@@ -472,7 +472,7 @@ namespace MahjongLineClient
                 ActivateTimer(null);
                 return null;
             }
-            else if (Properties.Settings.Default.AutoDiscardAfterRiichi && _requestManager.HumanCanAutoDiscard())
+            else if (Properties.Settings.Default.AutoDiscardAfterRiichi && _requestManager.HumanCanAutoDiscard(GamePivot.HUMAN_INDEX))
             {
                 Thread.Sleep(((CpuSpeedPivot)Properties.Settings.Default.CpuSpeed).ParseSpeed());
                 return new PanelButton("StpPickP", 0);
@@ -542,7 +542,7 @@ namespace MahjongLineClient
         // Discard action (human or CPU).
         private void Discard(TilePivot tile)
         {
-            if (_requestManager.Discard(tile))
+            if (_requestManager.Discard(_game.Round.CurrentPlayerIndex, tile))
             {
                 if (!_game.Round.PreviousIsHumanPlayer)
                 {
@@ -566,7 +566,7 @@ namespace MahjongLineClient
         // Chii call action (human or CPU).
         private void ChiiCall(Tuple<TilePivot, bool> chiiTilePick)
         {
-            if (_requestManager.CallChii(chiiTilePick.Item2 ? chiiTilePick.Item1.Number - 1 : chiiTilePick.Item1.Number))
+            if (_requestManager.CallChii(_game.Round.CurrentPlayerIndex, chiiTilePick.Item2 ? chiiTilePick.Item1.Number - 1 : chiiTilePick.Item1.Number))
             {
                 InvokeOverlay("Chii", _game.Round.CurrentPlayerIndex);
                 if (!_game.Round.IsHumanPlayer)
@@ -638,7 +638,7 @@ namespace MahjongLineClient
         // Pick action (human or CPU).
         private void Pick()
         {
-            TilePivot pick = _requestManager.Pick();
+            TilePivot pick = _requestManager.Pick(_game.Round.CurrentPlayerIndex);
             Dispatcher.Invoke(() =>
             {
                 SetPlayersLed();
@@ -652,7 +652,7 @@ namespace MahjongLineClient
         // Riichi call action (human or CPU).
         private void CallRiichi(TilePivot tile)
         {
-            if (_requestManager.CallRiichi(tile))
+            if (_requestManager.CallRiichi(_game.Round.CurrentPlayerIndex, tile))
             {
                 if (!_game.Round.PreviousIsHumanPlayer)
                 {
@@ -737,7 +737,7 @@ namespace MahjongLineClient
             {
                 CommonCallKan(previousPlayerIndex, compensationTile);
 
-                if (_requestManager.CanCallTsumo(true))
+                if (_requestManager.CanCallTsumo(GamePivot.HUMAN_INDEX, true))
                 {
                     BtnTsumo.Visibility = Visibility.Visible;
                     if (Properties.Settings.Default.AutoCallMahjong)
@@ -751,7 +751,7 @@ namespace MahjongLineClient
                 }
                 else
                 {
-                    _riichiTiles = _requestManager.CanCallRiichi();
+                    _riichiTiles = _requestManager.CanCallRiichi(GamePivot.HUMAN_INDEX);
                     if (_riichiTiles.Count > 0)
                     {
                         BtnRiichi.Visibility = Visibility.Visible;
@@ -799,7 +799,7 @@ namespace MahjongLineClient
             return this.FindPanel("StpHandP", GamePivot.HUMAN_INDEX)
                 .Children
                 .OfType<Button>()
-                .First(b => _requestManager.CanDiscard(b.Tag as TilePivot));
+                .First(b => _requestManager.CanDiscard(GamePivot.HUMAN_INDEX, b.Tag as TilePivot));
         }
 
         // Displays the call overlay.
@@ -1038,7 +1038,7 @@ namespace MahjongLineClient
             {
                 // When the CPU is playing
                 // Or it's player's turn but he has not pick yet
-                BtnChii.Visibility = _game.Round.IsHumanPlayer && _requestManager.CanCallChii().Keys.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                BtnChii.Visibility = _game.Round.IsHumanPlayer && _requestManager.CanCallChii(GamePivot.HUMAN_INDEX).Keys.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
                 BtnPon.Visibility = _requestManager.CanCallPon(GamePivot.HUMAN_INDEX) ? Visibility.Visible : Visibility.Collapsed;
                 BtnKan.Visibility = _requestManager.CanCallKan(GamePivot.HUMAN_INDEX).Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
