@@ -876,12 +876,18 @@ namespace MahjongLineClient
             this.FindPanel("StpPickP", pIndex).Children.Clear();
 
             panel.Children.Clear();
+            bool alreadyFlaggedTileAsPick = false;
             foreach (TilePivot tile in _game.Round.GetHand(pIndex).ConcealedTiles)
             {
-                if (pickTile == null || !ReferenceEquals(pickTile, tile))
+                bool currentTileIsSameAsPick = pickTile != null && tile.IsSimilarTo(pickTile);
+                if (!currentTileIsSameAsPick || alreadyFlaggedTileAsPick)
                 {
                     panel.Children.Add(tile.GenerateTileButton(isHuman && !_game.Round.IsRiichi(pIndex) ?
                         BtnDiscard_Click : (RoutedEventHandler)null, (AnglePivot)pIndex, !isHuman && !Properties.Settings.Default.DebugMode));
+                }
+                if (currentTileIsSameAsPick && !alreadyFlaggedTileAsPick)
+                {
+                    alreadyFlaggedTileAsPick = true;
                 }
             }
 

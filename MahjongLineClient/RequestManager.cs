@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 
 namespace MahjongLineClient
@@ -52,7 +53,9 @@ namespace MahjongLineClient
 
         public Dictionary<TilePivot, bool> CanCallChii()
         {
-            return SendQuery<Dictionary<TilePivot, bool>>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/chii");
+            var datas = SendQuery<List<KeyValuePair<TilePivot, bool>>>(HttpMethod.Get, $"games/{_gameId.ToString()}/check-calls/chii");
+
+            return datas.ToDictionary(d => d.Key, d => d.Value);
         }
 
         public List<TilePivot> CanCallKan(int playerIndex)
