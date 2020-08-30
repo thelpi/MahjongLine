@@ -82,13 +82,131 @@ namespace MahjongLineServer.Controllers
             return Ok(CheckGame(guid).GetPlayerCurrentWind(CheckPlayerIndex(playerIndex)));
         }
 
-        private static int CheckPlayerIndex(int playerIndex)
+        /// <summary>
+        /// Gets a game by its identifier.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>Game instance.</returns>
+        [HttpGet("{guid}")]
+        public ActionResult GetGame([FromRoute] Guid guid)
         {
-            if (playerIndex < 0 || playerIndex > 3)
+            return Ok(CheckGame(guid));
+        }
+
+        /// <summary>
+        /// Proceeds to next round.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="ronPlayerId">Ron player index; if any.</param>
+        /// <returns>Instance of <see cref="EndOfRoundInformationsPivot"/>.</returns>
+        [HttpPatch("{guid}/rounds?ronPlayerId={ronPlayerId}")]
+        public ActionResult NextRound([FromRoute] Guid guid, [FromQuery] int? ronPlayerId)
+        {
+            return Ok(CheckGame(guid).NextRound(CheckPlayerIndex(ronPlayerId)));
+        }
+
+        /// <summary>
+        /// Picks a tile.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>Picked tile.</returns>
+        [HttpPatch("{guid}/calls/pick")]
+        public ActionResult Pick([FromRoute] Guid guid)
+        {
+            return Ok(CheckGame(guid).Round.Pick());
+        }
+
+        /// <summary>
+        /// Calls riichi while discarding the specified tile.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="tileIndexInPlayerHand">Tile index in player hand.</param>
+        /// <returns>Success or failure of the operation.</returns>
+        [HttpPatch("{guid}/calls/riichi?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        public ActionResult CallRiichi([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
+        {
+            RoundPivot round = CheckGame(guid).Round;
+            TilePivot tile = round.GetTileFromIndex(tileIndexInPlayerHand);
+            return Ok(round.CallRiichi(tile));
+        }
+
+        /// <summary>
+        /// Proceeds to call chii.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="startNumber">Tile number of the first tile of the sequence.</param>
+        /// <returns>Success or failure of the operation.</returns>
+        [HttpPatch("{guid}/calls/chii?startNumber={startNumber}")]
+        public ActionResult CallChii([FromRoute] Guid guid, [FromQuery] int startNumber)
+        {
+            return Ok(CheckGame(guid).Round.CallChii(startNumber));
+        }
+
+        /// <summary>
+        /// Proceeds to call kan for the specified player.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="playerIndex">Player index.</param>
+        /// <param name="tileIndexInPlayerHand">Optionnal tile index.</param>
+        /// <returns>The compensation tile.</returns>
+        [HttpPatch("{guid}/players/{playerIndex}/calls/kan?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        public ActionResult CallKan([FromRoute] Guid guid, [FromRoute] int playerIndex, [FromQuery] int? tileIndexInPlayerHand)
+        {
+            RoundPivot round = CheckGame(guid).Round;
+            TilePivot tile = tileIndexInPlayerHand.HasValue ? round.GetTileFromIndex(tileIndexInPlayerHand.Value, playerIndex) : null;
+            return Ok(round.CallKan(CheckPlayerIndex(playerIndex), tile));
+        }
+
+        /// <summary>
+        /// Proceeds to undo a compensation pick.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <returns>No content.</returns>
+        [HttpPatch("{guid}/compensation-pick-undoing")]
+        public ActionResult UndoPickCompensationTile([FromRoute] Guid guid)
+        {
+            CheckGame(guid).Round.UndoPickCompensationTile();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Proceeds to call pon for the specified player.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns>Success or failure of the operation.</returns>
+        [HttpPatch("{guid}/players/{playerIndex}/calls/pon")]
+        public ActionResult CallPon([FromRoute] Guid guid, [FromRoute] int playerIndex)
+        {
+            return Ok(CheckGame(guid).Round.CallPon(CheckPlayerIndex(playerIndex)));
+        }
+
+        /// <summary>
+        /// Proceeds to discard.
+        /// </summary>
+        /// <param name="guid">Game identifier.</param>
+        /// <param name="tileIndexInPlayerHand">Tile index in the current player hand.</param>
+        /// <returns>Success or failure of the operation.</returns>
+        [HttpPatch("{guid}/calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}")]
+        public ActionResult Discard([FromRoute] Guid guid, [FromQuery] int tileIndexInPlayerHand)
+        {
+            RoundPivot round = CheckGame(guid).Round;
+            TilePivot tile = round.GetTileFromIndex(tileIndexInPlayerHand);
+            return Ok(round.Discard(tile));
+        }
+
+        private static int? CheckPlayerIndex(int? playerIndex)
+        {
+            if (playerIndex.HasValue && (playerIndex < 0 || playerIndex > 3))
             {
-                throw new InvalidPlayerIndexException(playerIndex);
+                throw new InvalidPlayerIndexException(playerIndex.Value);
             }
             return playerIndex;
+        }
+
+        private static int CheckPlayerIndex(int playerIndex)
+        {
+            return CheckPlayerIndex((int?)playerIndex).Value;
         }
 
         private static GamePivot CheckGame(Guid guid)

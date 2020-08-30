@@ -859,6 +859,32 @@ namespace MahjongLineServer.Pivot
             return _hands[playerIndex];
         }
 
+        /// <summary>
+        /// Gets the tile at the specified index in the hand of the current player.
+        /// </summary>
+        /// <param name="tileIndexInPlayerHand">Tile index.</param>
+        /// <param name="playerIndex">Optionnal; player index if not current player.</param>
+        /// <returns>The tile.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="playerIndex"/> is out of range.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="tileIndexInPlayerHand"/> is out of range.</exception>
+        public TilePivot GetTileFromIndex(int tileIndexInPlayerHand, int? playerIndex = null)
+        {
+            if (playerIndex.HasValue && playerIndex.Value < 0 || playerIndex.Value > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(playerIndex));
+            }
+
+            int actualPlayerIndex = playerIndex ?? CurrentPlayerIndex;
+
+            IReadOnlyCollection<TilePivot> tiles = GetHand(actualPlayerIndex).ConcealedTiles;
+            if (tileIndexInPlayerHand < 0 || tileIndexInPlayerHand >= tiles.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tileIndexInPlayerHand));
+            }
+
+            return tiles.ElementAt(tileIndexInPlayerHand);
+        }
+
         #endregion Public methods
 
         #region Private methods

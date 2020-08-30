@@ -163,9 +163,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public bool CallRiichi(TilePivot tile)
+        public bool CallRiichi(int tileIndexInPlayerHand)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/riichi?family={tile.Family}&dragon={tile.Dragon}&wind={tile.Wind}&number={tile.Number}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/riichi?tileIndexInPlayerHand={tileIndexInPlayerHand}");
             RefreshGame();
             return result;
         }
@@ -177,9 +177,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public TilePivot CallKan(int playerIndex, TilePivot tileChoice = null)
+        public TilePivot CallKan(int playerIndex, int? tileIndexInPlayerHand = null)
         {
-            TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/kan?family={tileChoice?.Family}&dragon={tileChoice?.Dragon}&wind={tileChoice?.Wind}&number={tileChoice?.Number}");
+            TilePivot result = SendQuery<TilePivot>(Patch(), $"games/{_gameId.ToString()}/players/{playerIndex}/calls/kan?tileIndexInPlayerHand={tileIndexInPlayerHand}");
             RefreshGame();
             NotifyWallCount?.Invoke(null, null);
             return result;
@@ -198,9 +198,9 @@ namespace MahjongLineClient
             return result;
         }
 
-        public bool Discard(TilePivot tile)
+        public bool Discard(int tileIndexInPlayerHand)
         {
-            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/discard?family={tile.Family}&dragon={tile.Dragon}&wind={tile.Wind}&number={tile.Number}");
+            bool result = SendQuery<bool>(Patch(), $"games/{_gameId.ToString()}/calls/discard?tileIndexInPlayerHand={tileIndexInPlayerHand}");
             RefreshGame();
             return result;
         }

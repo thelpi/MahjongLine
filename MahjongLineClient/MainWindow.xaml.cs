@@ -536,7 +536,7 @@ namespace MahjongLineClient
         // Discard action (human or CPU).
         private void Discard(TilePivot tile)
         {
-            if (_requestManager.Discard(tile))
+            if (_requestManager.Discard(_game.Round.GetTileIndex(tile)))
             {
                 if (!_game.Round.PreviousIsHumanPlayer)
                 {
@@ -646,7 +646,7 @@ namespace MahjongLineClient
         // Riichi call action (human or CPU).
         private void CallRiichi(TilePivot tile)
         {
-            if (_requestManager.CallRiichi(tile))
+            if (_requestManager.CallRiichi(_game.Round.GetTileIndex(tile)))
             {
                 if (!_game.Round.PreviousIsHumanPlayer)
                 {
@@ -671,7 +671,7 @@ namespace MahjongLineClient
         // Proceeds to call a kan for an opponent.
         private TilePivot OpponentBeginCallKan(int playerId, TilePivot kanTilePick, bool concealedKan, bool fromPreviousKan)
         {
-            TilePivot compensationTile = _requestManager.CallKan(playerId, concealedKan ? kanTilePick : null);
+            TilePivot compensationTile = _requestManager.CallKan(playerId, concealedKan ? _game.Round.GetTileIndex(kanTilePick, playerId) : (int?)null);
             if (compensationTile != null)
             {
                 InvokeOverlay("Kan", playerId);
@@ -720,7 +720,7 @@ namespace MahjongLineClient
         // Inner process kan call.
         private void HumanKanCallProcess(TilePivot tile, int? previousPlayerIndex)
         {
-            TilePivot compensationTile = _requestManager.CallKan(GamePivot.HUMAN_INDEX, tile);
+            TilePivot compensationTile = _requestManager.CallKan(GamePivot.HUMAN_INDEX, _game.Round.GetTileIndex(tile, GamePivot.HUMAN_INDEX));
             InvokeOverlay("Kan", GamePivot.HUMAN_INDEX);
             if (CheckOpponensRonCall(false))
             {
