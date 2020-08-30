@@ -29,11 +29,11 @@ namespace MahjongLineServer.Pivot
         /// Optionnal tile not concealed (from a call "pon", "chi" or "kan").
         /// The tile from a call "ron" is not considered as an open tile.
         /// </summary>
-        public readonly TilePivot OpenTile;
+        public TilePivot OpenTile { get; }
         /// <summary>
         /// If <see cref="OpenTile"/> is specified, indicates the wind which the tile has been stolen from; otherwise <c>Null</c>.
         /// </summary>
-        public readonly WindPivot? StolenFrom;
+        public WindPivot? StolenFrom { get; }
 
         #endregion Embedded properties
 

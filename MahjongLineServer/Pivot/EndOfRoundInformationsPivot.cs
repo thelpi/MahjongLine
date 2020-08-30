@@ -146,8 +146,10 @@ namespace MahjongLineServer.Pivot
         {
             #region Embedded properties
             
-            private readonly HandPivot _hand;
-
+            /// <summary>
+            /// Related hand.
+            /// </summary>
+            public HandPivot Hand { get; }
             /// <summary>
             /// Index in <see cref="GamePivot.Players"/>.
             /// </summary>
@@ -192,7 +194,7 @@ namespace MahjongLineServer.Pivot
             {
                 get
                 {
-                    return _hand?.Yakus;
+                    return Hand?.Yakus;
                 }
             }
 
@@ -203,7 +205,7 @@ namespace MahjongLineServer.Pivot
             {
                 get
                 {
-                    return _hand?.IsConcealed == true;
+                    return Hand?.IsConcealed == true;
                 }
             }
 
@@ -217,7 +219,7 @@ namespace MahjongLineServer.Pivot
             /// <param name="index">The <see cref="Index"/> value.</param>
             /// <param name="fanCount">The <see cref="FanCount"/> value.</param>
             /// <param name="fuCount">The <see cref="FuCount"/> value.</param>
-            /// <param name="hand">The <see cref="_hand"/> value.</param>
+            /// <param name="hand">The <see cref="Hand"/> value.</param>
             /// <param name="pointsGain">The <see cref="PointsGain"/> value.</param>
             /// <param name="doraCount">The <see cref="DoraCount"/> value.</param>
             /// <param name="uraDoraCount">The <see cref="UraDoraCount"/> value.</param>
@@ -234,7 +236,7 @@ namespace MahjongLineServer.Pivot
                 UraDoraCount = uraDoraCount;
                 RedDoraCount = redDoraCount;
                 HandPointsGain = handPointsGain;
-                _hand = hand;
+                Hand = hand;
             }
 
             /// <summary>
